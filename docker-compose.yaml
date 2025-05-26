@@ -1,0 +1,41 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    restart: on-failure
+    networks:
+      service_net:
+        ipv4_address: 172.18.0.2
+
+  backend:
+    build:
+      context: .
+      dockerfile: dockers/backend.dockerfile
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    networks:
+      service_net:
+        ipv4_address: 172.18.0.3
+    depends_on:
+      - redis
+
+  frontend:
+    build:
+      context: .
+      dockerfile: dockers/frontend.dockerfile
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    networks:
+      service_net:
+        ipv4_address: 172.18.0.4
+    depends_on:
+      - backend
+networks:
+  service_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
