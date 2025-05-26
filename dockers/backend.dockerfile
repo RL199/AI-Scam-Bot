@@ -1,6 +1,5 @@
-FROM python:3.9-slim
+FROM python:3.13-slim
 
-# Update system packages to fix vulnerabilities
 RUN apt-get update && \
 	apt-get upgrade -y && \
 	apt-get clean && \
