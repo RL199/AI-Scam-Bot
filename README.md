@@ -71,4 +71,4 @@ Roy, L. (2025). AI Scam Bot Simulator: A Tool for Cybersecurity Research.
 GitHub Repository: https://github.com/RL199/AI-Scam-Bot
 ```
 
-© 2025 [Roy Levi]. Content available under CC BY-NC 4.0 License.
+© 2025 Roy Levi. Content available under CC BY-NC 4.0 License.
