@@ -51,7 +51,7 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/AI-Scam-Bot.git
+git clone https://github.com/RL199/AI-Scam-Bot.git
 cd AI-Scam-Bot
 
 # Create a virtual environment
