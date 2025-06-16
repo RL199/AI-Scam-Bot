@@ -33,14 +33,14 @@ async def startup_event():
     try:
         logger.info("Loading LLM model...")
         llm_model = LLMModel()
-        await llm_model.load_model()
+        await llm_model.load_model() # TODO: NOTE: what will happen if the model takes too long to load? Should we have a timeout or a background task? 
         logger.info("Model loaded successfully")
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
-        raise
+        raise # TODO: NOTE: How to handle a model failure? shoud we cretae some retry logic or a fallback mechanism? Or just raise an error and stop the server?
 
 
-@app.on_event("shutdown")
+@app.on_event("shutdown") #TODO "on_event" in class "FastAPI" is deprecated 
 async def shutdown_event():
     """Cleanup on shutdown"""
     global llm_model
@@ -60,9 +60,9 @@ async def health_check():
     try:
         if llm_model and llm_model.is_loaded():
             return {"status": "healthy", "model_status": "loaded", "api_version": "1.0.0"}
-        raise
-    except
-
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    except HTTPException as error:
+        raise error
 
 @app.post("/generate", response_model=GenerateResponse)
 async def generate_text(request: GenerateRequest):
@@ -75,7 +75,6 @@ async def generate_text(request: GenerateRequest):
     try:
         generated_text = await llm_model.generate(
             prompt=request.prompt,
-            max_length=request.max_length or 256,
             temperature=request.temperature or 0.7,
             top_p=request.top_p or 0.9,
         )
@@ -87,11 +86,12 @@ async def generate_text(request: GenerateRequest):
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest): #TODO  chat vs generate? why we have both? 
+    # TODO NOTE: where is the conversation history stored? How do we manage it? Do we need to have another function to manage conversation history?
     """Chat with the model using conversation history"""
     global llm_model
 
-    if not llm_model or not llm_model.is_loaded():
+    if not llm_model or not llm_model.is_loaded(): #TODO create a validate function instead of checking llm_model each time, you can include that on the model class or as a function\decorator
         raise HTTPException(status_code=503, detail="Model not loaded")
 
     try:
