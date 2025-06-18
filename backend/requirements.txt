@@ -1,20 +1,20 @@
-aioredis == 2.0.1
-black == 25.1.0
-fakeredis == 2.29.0
-fastapi == 0.115.12
-flake8 == 7.2.0
-httpx == 0.28.1
-pylint == 3.3.7
-pytest == 8.3.5
-requests == 2.32.3
-uvicorn[standard] == 0.34.2
-transformers == 4.52.3
-torch == 2.7.0
-accelerate == 1.2.1
-bitsandbytes == 0.45.0
-peft == 0.14.0
-datasets == 3.2.0
-pydantic == 2.10.4
-python-multipart == 0.0.20
-jinja2 == 3.1.5
-redis == 5.2.0
+aioredis == 2.0.1         # Async Redis client for Python, enables non-blocking Redis operations
+black == 25.1.0           # Code formatter that automatically formats Python code to PEP 8 standards
+fakeredis == 2.29.0       # In-memory Redis server implementation for testing without real Redis
+fastapi == 0.115.12       # Modern web framework for building APIs with automatic documentation
+flake8 == 7.2.0           # Code linter that checks for style guide enforcement and programming errors
+httpx == 0.28.1           # HTTP client library with async support, modern alternative to requests
+pylint == 3.3.7           # Static code analyzer that checks for errors and code quality issues
+pytest == 8.3.5           # Testing framework for writing and running unit tests
+requests == 2.32.3        # Simple HTTP library for making web requests and API calls
+uvicorn[standard] == 0.34.2  # ASGI server for running FastAPI applications with extra features
+transformers == 4.52.3    # Hugging Face library for working with pre-trained transformer models
+torch == 2.7.0            # PyTorch deep learning framework for neural networks and ML
+accelerate == 1.2.1       # Library for distributed training and mixed precision with transformers
+bitsandbytes == 0.45.0    # Memory-efficient optimizers and quantization for large models
+peft == 0.14.0            # Parameter-Efficient Fine-Tuning methods for large language models
+datasets == 3.2.0         # Hugging Face library for loading and processing ML datasets
+pydantic == 2.10.4        # Data validation library using Python type annotations
+python-multipart == 0.0.20  # Parser for multipart/form-data, used for file uploads in FastAPI
+jinja2 == 3.1.5           # Template engine for generating dynamic HTML or text content
+redis == 5.2.0            # Synchronous Redis client for Python database operations
