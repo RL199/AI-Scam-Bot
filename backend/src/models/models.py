@@ -50,7 +50,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    messages: List[ChatMessage]
+    messages: List[ChatMessage] 
     max_length: Optional[int] = 256
     temperature: Optional[float] = 0.7
 

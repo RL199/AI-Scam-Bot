@@ -40,8 +40,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown code
-    """Cleanup on shutdown"""
     if llm_model:
         await llm_model.cleanup()
 
@@ -49,7 +47,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="AI Scam Bot API", version="1.0.0", lifespan=lifespan)
 
 # Configure CORS
-app.add_middleware(
+app.add_middleware( # TODO : limit access only to the docker's IP\ports to avoid security issues.
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -67,7 +65,6 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Detailed health check"""
     global llm_model
     try:
         if llm_model and llm_model.is_loaded():
@@ -75,31 +72,11 @@ async def health_check():
         raise HTTPException(status_code=503, detail="Model not loaded")
     except HTTPException as error:
         raise error
-
-@app.post("/generate", response_model=GenerateResponse)
-@validate_model
-async def generate_text(request: GenerateRequest):
-    """Generate text from a prompt"""
-    global llm_model
-
-    try:
-        assert llm_model is not None
-        generated_text = await llm_model.generate(
-            prompt=request.prompt,
-            temperature=0.7 if request.temperature is None else request.temperature,
-            top_p=0.9 if request.top_p is None else request.top_p,
-        )
-
-        return GenerateResponse(generated_text=generated_text, prompt=request.prompt)
-    except Exception as e:
-        logger.error(f"Generation error: {e}")
-        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
-
+    
 
 @app.post("/chat", response_model=ChatResponse)
 @validate_model
-async def chat(request: ChatRequest): #TODO  chat vs generate? why we have both?
-    # TODO NOTE: where is the conversation history stored? How do we manage it? Do we need to have another function to manage conversation history?
+async def chat(request: ChatRequest):
     """Chat with the model using conversation history"""
     global llm_model
 
@@ -117,9 +94,9 @@ async def chat(request: ChatRequest): #TODO  chat vs generate? why we have both?
         )
 
         return ChatResponse(response=response)
-    except Exception as e:
-        logger.error(f"Chat error: {e}")
-        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+    except Exception as error:
+        logger.error(f"Chat error: {error}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Chat failed: {error}")
 
 
 @app.get("/model/info")

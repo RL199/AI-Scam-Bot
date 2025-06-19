@@ -15,7 +15,7 @@ import os
 logger = logging.getLogger(__name__)
 
 class LLMModel:
-    MAX_lENGTH = 256  # Default max length for generation
+    MAX_LENGTH = 256  # Default max length for generation
     def __init__(self, model_name: str = "microsoft/DialoGPT-medium"):
         self.model_name = model_name
         self.model = None
@@ -121,7 +121,7 @@ class LLMModel:
     async def generate(
         self,
         prompt: str,
-        max_length: int = MAX_lENGTH,
+        max_length: int = MAX_LENGTH,
         temperature: float = 0.7,
         top_p: float = 0.9
     ) -> str:
