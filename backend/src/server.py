@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
         llm_model = LLMModel()
         await llm_model.load_model()
         logger.info("Model loaded successfully")
-        
+
         # Initialize database
         logger.info("Connecting to database...")
         db_manager = DatabaseManager()
@@ -48,8 +48,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown code
-    """Cleanup on shutdown"""
     if llm_model:
         await llm_model.cleanup()
     if db_manager:
@@ -59,7 +57,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="AI Scam Bot API", version="1.0.0", lifespan=lifespan)
 
 # Configure CORS
-app.add_middleware(
+app.add_middleware( # TODO : limit access only to the docker's IP\ports to avoid security issues.
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -78,7 +76,6 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Detailed health check"""
     global llm_model
     try:
         if llm_model and llm_model.is_loaded():
@@ -86,25 +83,6 @@ async def health_check():
         raise HTTPException(status_code=503, detail="Model not loaded")
     except HTTPException as error:
         raise error
-
-@app.post("/generate", response_model=GenerateResponse)
-@validate_model
-async def generate_text(request: GenerateRequest):
-    """Generate text from a prompt"""
-    global llm_model
-
-    try:
-        assert llm_model is not None
-        generated_text = await llm_model.generate(
-            prompt=request.prompt,
-            temperature=0.7 if request.temperature is None else request.temperature,
-            top_p=0.9 if request.top_p is None else request.top_p,
-        )
-
-        return GenerateResponse(generated_text=generated_text, prompt=request.prompt)
-    except Exception as e:
-        logger.error(f"Generation error: {e}")
-        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -115,10 +93,13 @@ async def chat(request: ChatRequest):
 
     try:
         start_time = time.time()
-        
+
         # Create conversation if not provided
         conversation_id = request.conversation_id
         if not conversation_id:
+            if db_manager is None:
+                raise HTTPException(status_code=500, detail="Database manager not initialized")
+
             conversation_id = await db_manager.create_conversation(
                 user_id=request.user_id,
                 title=f"Chat {len(request.messages)} messages"
@@ -146,6 +127,8 @@ async def chat(request: ChatRequest):
         )
 
         # Save assistant response to database
+        if db_manager is None:
+            raise HTTPException(status_code=500, detail="Database manager not initialized")
         await db_manager.save_message(
             conversation_id=conversation_id,
             role="assistant",
@@ -154,6 +137,8 @@ async def chat(request: ChatRequest):
 
         # Save interaction statistics
         generation_time = int((time.time() - start_time) * 1000)
+        if db_manager is None:
+            raise HTTPException(status_code=500, detail="Database manager not initialized")
         await db_manager.save_interaction_stats(
             conversation_id=conversation_id,
             generation_time_ms=generation_time,
@@ -172,13 +157,13 @@ async def chat(request: ChatRequest):
 async def create_conversation(request: ConversationRequest):
     """Create a new conversation"""
     global db_manager
-    
+
     try:
         conversation_id = await db_manager.create_conversation(
             user_id=request.user_id,
             title=request.title
         )
-        
+
         return ConversationResponse(
             conversation_id=conversation_id,
             title=request.title,
@@ -193,7 +178,7 @@ async def create_conversation(request: ConversationRequest):
 async def get_conversation_history(conversation_id: str, limit: int = 50):
     """Get conversation history"""
     global db_manager
-    
+
     try:
         history = await db_manager.get_conversation_history(conversation_id, limit)
         return {"conversation_id": conversation_id, "messages": history}
@@ -206,7 +191,7 @@ async def get_conversation_history(conversation_id: str, limit: int = 50):
 async def get_user_conversations(user_id: str, limit: int = 20):
     """Get user's conversations"""
     global db_manager
-    
+
     try:
         conversations = await db_manager.get_user_conversations(user_id, limit)
         return {"user_id": user_id, "conversations": conversations}
