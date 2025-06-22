@@ -53,6 +53,8 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     max_length: Optional[int] = 256
     temperature: Optional[float] = 0.7
+    conversation_id: Optional[str] = None
+    user_id: Optional[str] = None
 
     @field_validator("messages")
     @classmethod
@@ -74,3 +76,15 @@ class GenerateResponse(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+    conversation_id: str
+
+
+class ConversationRequest(BaseModel):
+    user_id: Optional[str] = None
+    title: Optional[str] = None
+
+
+class ConversationResponse(BaseModel):
+    conversation_id: str
+    title: Optional[str] = None
+    created_at: str
