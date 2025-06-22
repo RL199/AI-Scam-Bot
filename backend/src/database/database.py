@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any
 import json
 from datetime import datetime
 import uuid
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class DatabaseManager:
                 user=self.user,
                 password=self.password,
                 db=self.database,
-                autocommit=True,
+                autocommit=False,
                 minsize=1,
                 maxsize=10,
             )
@@ -76,6 +77,10 @@ class DatabaseManager:
         metadata: Optional[Dict[str, Any]] = None,
     ):
         """Save a message to the database"""
+
+        if role not in ["user", "assistant", "system"]:
+            raise ValueError(f"Invalid role: {role}. Must be one of: user, assistant, system")
+
         if self.pool is None:
             raise RuntimeError("Database connection pool is not initialized")
 
@@ -160,3 +165,18 @@ class DatabaseManager:
                     (user_id, limit),
                 )
                 return await cursor.fetchall()
+
+    @asynccontextmanager
+    async def transaction(self):
+        """Context manager for handling transactions"""
+        if self.pool is None:
+            raise RuntimeError("Database connection pool is not initialized")
+        async with self.pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await conn.begin()
+                try:
+                    yield cursor
+                    await conn.commit()
+                except Exception:
+                    await conn.rollback()
+                    raise
