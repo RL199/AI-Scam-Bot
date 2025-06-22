@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator
 from typing import Optional, List
 
-from pyparsing import Enum
+from enum import Enum
 
 
 class ChatRole(str, Enum):
@@ -50,7 +50,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    messages: List[ChatMessage] 
+    messages: List[ChatMessage]
     max_length: Optional[int] = 256
     temperature: Optional[float] = 0.7
     conversation_id: Optional[str] = None
