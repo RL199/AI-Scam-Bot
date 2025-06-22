@@ -148,7 +148,7 @@ class DatabaseManager:
         """Get user's conversations"""
         if self.pool is None:
             raise RuntimeError("Database connection pool is not initialized")
-        
+
         async with self.pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute(

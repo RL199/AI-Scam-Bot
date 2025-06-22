@@ -108,6 +108,8 @@ async def chat(request: ChatRequest):
         # Save user messages to database
         for msg in request.messages:
             if msg.role == "user":
+                if db_manager is None:
+                    raise HTTPException(status_code=500, detail="Database manager not initialized")
                 await db_manager.save_message(
                     conversation_id=conversation_id,
                     role=msg.role,
@@ -148,9 +150,9 @@ async def chat(request: ChatRequest):
         )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
-    except Exception as e:
-        logger.error(f"Chat error: {e}")
-        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+    except Exception as error:
+        logger.error(f"Chat error: {error}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Chat failed: {error}")
 
 
 @app.post("/conversations", response_model=ConversationResponse)
@@ -159,6 +161,8 @@ async def create_conversation(request: ConversationRequest):
     global db_manager
 
     try:
+        if db_manager is None:
+            raise HTTPException(status_code=500, detail="Database manager not initialized")
         conversation_id = await db_manager.create_conversation(
             user_id=request.user_id,
             title=request.title
@@ -180,6 +184,8 @@ async def get_conversation_history(conversation_id: str, limit: int = 50):
     global db_manager
 
     try:
+        if db_manager is None:
+            raise HTTPException(status_code=500, detail="Database manager not initialized")
         history = await db_manager.get_conversation_history(conversation_id, limit)
         return {"conversation_id": conversation_id, "messages": history}
     except Exception as e:
@@ -193,6 +199,8 @@ async def get_user_conversations(user_id: str, limit: int = 20):
     global db_manager
 
     try:
+        if db_manager is None:
+            raise HTTPException(status_code=500, detail="Database manager not initialized")
         conversations = await db_manager.get_user_conversations(user_id, limit)
         return {"user_id": user_id, "conversations": conversations}
     except Exception as e:
