@@ -1,10 +1,8 @@
 FROM mysql:9.0
 
-# Set environment variables
-ENV MYSQL_ROOT_PASSWORD=rootpassword
+# Set non-sensitive default values
 ENV MYSQL_DATABASE=scambot_db
 ENV MYSQL_USER=scambot_user
-ENV MYSQL_PASSWORD=scambot_password
 
 # Copy initialization scripts
 COPY database/init.sql /docker-entrypoint-initdb.d/
