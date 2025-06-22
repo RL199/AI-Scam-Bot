@@ -4,11 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from contextlib import asynccontextmanager
 
-from models.models import GenerateResponse, GenerateRequest, ChatResponse, ChatRequest
+from models.models import GenerateResponse, GenerateRequest, ChatResponse, ChatRequest, ConversationRequest, ConversationResponse
 import uvicorn
 import logging
+import time
 
 from model import LLMModel
+from database.database import DatabaseManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,16 +29,22 @@ def validate_model(func):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup code
-    """Initialize the LLM model on startup"""
-    global llm_model
+    """Initialize the LLM model and database on startup"""
+    global llm_model, db_manager
     try:
         logger.info("Loading LLM model...")
         llm_model = LLMModel()
-        await llm_model.load_model() # TODO: NOTE: what will happen if the model takes too long to load? Should we have a timeout or a background task?
+        await llm_model.load_model()
         logger.info("Model loaded successfully")
+        
+        # Initialize database
+        logger.info("Connecting to database...")
+        db_manager = DatabaseManager()
+        await db_manager.connect()
+        logger.info("Database connected successfully")
     except Exception as e:
-        logger.error(f"Failed to load model: {e}")
-        raise # TODO: NOTE: How to handle a model failure? shoud we cretae some retry logic or a fallback mechanism? Or just raise an error and stop the server?
+        logger.error(f"Failed to initialize services: {e}")
+        raise
 
     yield
 
@@ -44,6 +52,8 @@ async def lifespan(app: FastAPI):
     """Cleanup on shutdown"""
     if llm_model:
         await llm_model.cleanup()
+    if db_manager:
+        await db_manager.disconnect()
 
 
 app = FastAPI(title="AI Scam Bot API", version="1.0.0", lifespan=lifespan)
@@ -57,8 +67,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global model instance
+# Global instances
 llm_model = None
+db_manager = None
 
 @app.get("/")
 async def root():
@@ -98,12 +109,30 @@ async def generate_text(request: GenerateRequest):
 
 @app.post("/chat", response_model=ChatResponse)
 @validate_model
-async def chat(request: ChatRequest): #TODO  chat vs generate? why we have both?
-    # TODO NOTE: where is the conversation history stored? How do we manage it? Do we need to have another function to manage conversation history?
+async def chat(request: ChatRequest):
     """Chat with the model using conversation history"""
-    global llm_model
+    global llm_model, db_manager
 
     try:
+        start_time = time.time()
+        
+        # Create conversation if not provided
+        conversation_id = request.conversation_id
+        if not conversation_id:
+            conversation_id = await db_manager.create_conversation(
+                user_id=request.user_id,
+                title=f"Chat {len(request.messages)} messages"
+            )
+
+        # Save user messages to database
+        for msg in request.messages:
+            if msg.role == "user":
+                await db_manager.save_message(
+                    conversation_id=conversation_id,
+                    role=msg.role,
+                    content=msg.content
+                )
+
         # Convert ChatMessage objects to dictionaries
         messages_dict = [
             {"role": msg.role, "content": msg.content} for msg in request.messages
@@ -116,11 +145,74 @@ async def chat(request: ChatRequest): #TODO  chat vs generate? why we have both?
             temperature=0.7 if request.temperature is None else request.temperature,
         )
 
-        return ChatResponse(response=response)
+        # Save assistant response to database
+        await db_manager.save_message(
+            conversation_id=conversation_id,
+            role="assistant",
+            content=response
+        )
+
+        # Save interaction statistics
+        generation_time = int((time.time() - start_time) * 1000)
+        await db_manager.save_interaction_stats(
+            conversation_id=conversation_id,
+            generation_time_ms=generation_time,
+            model_name=llm_model.model_name,
+            temperature=0.7 if request.temperature is None else request.temperature,
+            max_length=256 if request.max_length is None else request.max_length
+        )
+
+        return ChatResponse(response=response, conversation_id=conversation_id)
     except Exception as e:
         logger.error(f"Chat error: {e}")
         raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
 
+
+@app.post("/conversations", response_model=ConversationResponse)
+async def create_conversation(request: ConversationRequest):
+    """Create a new conversation"""
+    global db_manager
+    
+    try:
+        conversation_id = await db_manager.create_conversation(
+            user_id=request.user_id,
+            title=request.title
+        )
+        
+        return ConversationResponse(
+            conversation_id=conversation_id,
+            title=request.title,
+            created_at=str(time.time())
+        )
+    except Exception as e:
+        logger.error(f"Error creating conversation: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create conversation: {str(e)}")
+
+
+@app.get("/conversations/{conversation_id}/history")
+async def get_conversation_history(conversation_id: str, limit: int = 50):
+    """Get conversation history"""
+    global db_manager
+    
+    try:
+        history = await db_manager.get_conversation_history(conversation_id, limit)
+        return {"conversation_id": conversation_id, "messages": history}
+    except Exception as e:
+        logger.error(f"Error getting conversation history: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get history: {str(e)}")
+
+
+@app.get("/users/{user_id}/conversations")
+async def get_user_conversations(user_id: str, limit: int = 20):
+    """Get user's conversations"""
+    global db_manager
+    
+    try:
+        conversations = await db_manager.get_user_conversations(user_id, limit)
+        return {"user_id": user_id, "conversations": conversations}
+    except Exception as e:
+        logger.error(f"Error getting user conversations: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get conversations: {str(e)}")
 
 @app.get("/model/info")
 @validate_model
