@@ -1,1 +1,28 @@
 frontend/node_modules
+
+# Security: Environment files and secrets
+.env
+.env.local
+.env.production
+.env.staging
+secrets/*.txt
+secrets/*.key
+secrets/*.pem
+
+# Database data
+mysql_data/
+postgres_data/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
