@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from contextlib import asynccontextmanager
 
+from datetime import datetime
+
 from models.models import (
     GenerateResponse,
     GenerateRequest,
@@ -177,7 +179,7 @@ async def create_conversation(request: ConversationRequest):
         return ConversationResponse(
             conversation_id=conversation_id,
             title=request.title,
-            created_at=str(time.time()),
+            created_at=datetime.utcnow().isoformat(),
         )
     except Exception as e:
         logger.error(f"Error creating conversation: {e}")

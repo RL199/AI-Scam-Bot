@@ -108,12 +108,8 @@ class LLMModel:
                 role = msg.get("role", "user")
                 content = msg.get("content", "")
 
-                # Map roles to Ollama format
-                if role == "assistant":
-                    role = "assistant"
-                elif role == "system":
-                    role = "system"
-                else:
+                # Ensure role is valid (default to "user" if not recognized)
+                if role not in ["assistant", "system", "user"]:
                     role = "user"
 
                 ollama_messages.append({"role": role, "content": content})
