@@ -18,11 +18,3 @@ redis == 5.2.0            # Synchronous Redis client for Python database operati
 aiomysql == 0.2.0         # Async MySQL client for database operations
 sqlalchemy == 2.0.36      # SQL toolkit and ORM for database operations
 alembic == 1.14.0         # Database migration tool for SQLAlchemy
-
-# Optional dependencies for huggingface:
-# transformers == 4.52.3    # Hugging Face library for working with pre-trained transformer models
-# torch == 2.7.0            # PyTorch deep learning framework for neural networks and ML
-# accelerate == 1.2.1       # Library for distributed training and mixed precision with transformers
-# bitsandbytes == 0.45.0    # Memory-efficient optimizers and quantization for large models
-# peft == 0.14.0            # Parameter-Efficient Fine-Tuning methods for large language models
-# datasets == 3.2.0         # Hugging Face library for loading and processing ML datasets
