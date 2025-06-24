@@ -19,11 +19,11 @@ CREATE TABLE IF NOT EXISTS messages (
     conversation_id VARCHAR(36) NOT NULL,
     role ENUM('user', 'assistant', 'system') NOT NULL,
     content TEXT NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     metadata JSON,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
     INDEX idx_conversation_id (conversation_id),
-    INDEX idx_timestamp (timestamp)
+    INDEX idx_created_at (created_at)
 );
 
 -- Create interaction_stats table for analytics
@@ -38,5 +38,6 @@ CREATE TABLE IF NOT EXISTS interaction_stats (
     response_tokens INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
-    INDEX idx_conversation_id (conversation_id)
+    INDEX idx_conversation_id (conversation_id),
+    INDEX idx_created_at (created_at)
 );
