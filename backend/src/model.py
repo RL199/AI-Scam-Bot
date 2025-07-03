@@ -3,20 +3,18 @@ import logging
 from typing import List, Dict, Any
 import asyncio
 
-logger = logging.getLogger(__name__)
-
 class LLMModel:
-
-    def __init__(self, model_name: str = "llama3.2-vision:11b"):
+    def __init__(self, model_name: str = "llama3.2-vision:11b", logger: logging.logger = logging.getLogger(__name__), ollama_host: str = "http://localhost:11434"):
+        self.logger = logger
         self.model_name = model_name
         self.client = None
         self._loaded = False
-        self.ollama_host = "http://localhost:11434"
+        self.ollama_host = ollama_host
 
-    async def load_model(self):
+    async def load_model(self) -> None:
         """Initialize Ollama client and verify model availability"""
         try:
-            logger.info(f"Initializing Ollama client for model: {self.model_name}")
+            self.logger.info(f"Initializing Ollama client for model: {self.model_name}")
 
             # Initialize Ollama client
             self.client = ollama.AsyncClient(host=self.ollama_host)
@@ -25,13 +23,13 @@ class LLMModel:
             await self._ensure_model_available()
 
             self._loaded = True
-            logger.info("Ollama model initialized successfully")
+            self.logger.info("Ollama model initialized successfully")
 
         except Exception as e:
-            logger.error(f"Failed to initialize Ollama model: {e}")
+            self.logger.error(f"Failed to initialize Ollama model: {e}")
             raise
 
-    async def _ensure_model_available(self):
+    async def _ensure_model_available(self) -> None: #TODO make sure you have type hints for all functions
         """Ensure the model is downloaded and available"""
         if self.client is None:
             raise RuntimeError("Client not initialized")
@@ -39,20 +37,20 @@ class LLMModel:
         try:
             # List available models
             models = await self.client.list()
-            model_names = [model["name"] for model in models["models"]]
+            model_names = [model["name"] for model in models["models"]] #TODO if model or name doesnt exist this will raise an error, use .get() to avoid KeyError
 
             if self.model_name not in model_names:
-                logger.info(
+                self.logger.info(
                     f"Model {self.model_name} not found locally. Downloading..."
                 )
                 # Pull the model if not available
                 await self.client.pull(self.model_name)
-                logger.info(f"Model {self.model_name} downloaded successfully")
+                self.logger.info(f"Model {self.model_name} downloaded successfully")
             else:
-                logger.info(f"Model {self.model_name} is available locally")
+                self.logger.info(f"Model {self.model_name} is available locally")
 
         except Exception as e:
-            logger.error(f"Error checking/downloading model: {e}")
+            self.logger.error(f"Error checking/downloading model: {e}")
             raise
 
     def is_loaded(self) -> bool:
@@ -88,7 +86,7 @@ class LLMModel:
             return response["response"].strip()
 
         except Exception as e:
-            logger.error(f"Generation error: {e}")
+            self.logger.error(f"Generation error: {e}")
             raise
 
     async def chat(
@@ -126,7 +124,7 @@ class LLMModel:
             return response["message"]["content"].strip()
 
         except Exception as e:
-            logger.error(f"Chat error: {e}")
+            self.logger.error(f"Chat error: {e}")
             raise
 
     async def get_model_info(self) -> Dict[str, Any]:
@@ -157,7 +155,7 @@ class LLMModel:
                     }
                 )
             except Exception as e:
-                logger.error(f"Error getting model info: {e}")
+                self.logger.error(f"Error getting model info: {e}")
                 info["error"] = str(e)
 
         return info
@@ -171,10 +169,10 @@ class LLMModel:
                 self.client = None
 
             self._loaded = False
-            logger.info("Ollama model cleanup completed")
+            self.logger.info("Ollama model cleanup completed")
 
         except Exception as e:
-            logger.error(f"Cleanup error: {e}")
+            self.logger.error(f"Cleanup error: {e}")
 
     def __del__(self):
         """Destructor to ensure cleanup"""

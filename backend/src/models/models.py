@@ -4,11 +4,15 @@ from typing import Optional, List
 from enum import Enum
 
 
-class ChatRole(str, Enum):
-    USER = "user"
-    ASSISTANT = "assistant"
-    SYSTEM = "system"
+class ChatRole(str, Enum): #TODO check if its even valid
+    # or user or assistant or system check if it is one of these
+    role : str = "user"
 
+    @field_validator("role")
+    def validate_role(cls, value):
+        if value not in ["user", "assistant", "system"]:
+            raise ValueError("Role must be one of: user, assistant, system")
+        return value
 
 # Pydantic models for request/response
 class GenerateRequest(BaseModel):

@@ -39,9 +39,9 @@ class DatabaseManager:
                 maxsize=10,
             )
             logger.info("Database connection pool created successfully")
-        except Exception as e:
-            logger.error(f"Failed to create database connection pool: {e}")
-            raise
+        except aiomysql.Error as error:
+            logger.error(f"Error creating database connection pool: {error}")
+            raise RuntimeError(f"Failed to connect to database: {error}")
 
     async def disconnect(self):
         """Close database connection pool"""
@@ -54,9 +54,10 @@ class DatabaseManager:
         self, user_id: Optional[str] = None, title: Optional[str] = None
     ) -> str:
         """Create a new conversation and return its ID"""
+        # TODO missing try except block to handle errors
         conversation_id = str(uuid.uuid4())
 
-        if self.pool is None:
+        if self.pool is None: #TODO : create decorator to check if pool is initialized
             raise RuntimeError("Database connection pool is not initialized")
 
         async with self.pool.acquire() as conn:
@@ -78,7 +79,7 @@ class DatabaseManager:
     ):
         """Save a message to the database"""
 
-        if role not in ["user", "assistant", "system"]:
+        if role not in ["user", "assistant", "system"]: #TODO : move ["user", "assistant", "system"] to a constant variable to avoid duplication
             raise ValueError(f"Invalid role: {role}. Must be one of: user, assistant, system")
 
         if self.pool is None:
@@ -110,7 +111,7 @@ class DatabaseManager:
         if self.pool is None:
             raise RuntimeError("Database connection pool is not initialized")
 
-        async with self.pool.acquire() as conn:
+        async with self.pool.acquire() as conn: #TODO: missing try except block to handle errors everything with called third party library should be wrapped in try except block
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     """INSERT INTO interaction_stats
@@ -165,18 +166,3 @@ class DatabaseManager:
                     (user_id, limit),
                 )
                 return await cursor.fetchall()
-
-    @asynccontextmanager
-    async def transaction(self):
-        """Context manager for handling transactions"""
-        if self.pool is None:
-            raise RuntimeError("Database connection pool is not initialized")
-        async with self.pool.acquire() as conn:
-            async with conn.cursor() as cursor:
-                await conn.begin()
-                try:
-                    yield cursor
-                    await conn.commit()
-                except Exception:
-                    await conn.rollback()
-                    raise

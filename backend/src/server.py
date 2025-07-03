@@ -1,11 +1,11 @@
+from contextlib import asynccontextmanager
+from datetime import datetime
 from functools import wraps
+import logging
+import time
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
-from contextlib import asynccontextmanager
-
-from datetime import datetime
-
 from models.models import (
     GenerateResponse,
     GenerateRequest,
@@ -15,22 +15,33 @@ from models.models import (
     ConversationResponse,
 )
 import uvicorn
-import logging
-import time
 
 from model import LLMModel
 from database.database import DatabaseManager
+
+# TODO import structure python imports -> package imports -> local imports
+# TODO makefile for pylint and flake8
+# TODO: Solid principles -> check about it.
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Default values for model parameters
+# Default values for model parameters #TODO move it to config.py or .env file or .config file
 DEFAULT_TEMPERATURE = 0.7
 DEFAULT_MAX_LENGTH = 256
 
+# Configure CORS
+# Configure allowed origins based on environment
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Local development
+    "https://your-frontend-domain.com",  # Production frontend
+]
 
-def validate_model(func):
+
+
+
+def validate_model(func): # TODO move to utils.py or decorators.py
     """Decorator to validate that the LLM model is loaded before executing the endpoint"""
 
     @wraps(func)
@@ -42,13 +53,13 @@ def validate_model(func):
 
     return wrapper
 
-
-def ensure_db_manager():
+# 
+def ensure_db_manager(): # TODO move to utils.py or decorators.py
     """Helper function to ensure database manager is initialized"""
     global db_manager
     if db_manager is None:
         raise HTTPException(status_code=500, detail="Database manager not initialized")
-    return db_manager
+    return db_manager #TODO : if db_manager is None: tell the user that the database is not initialized, and that they should wait for the server to start up , meanwhile try again to set the DB manager if it failed\None.
 
 
 @asynccontextmanager
@@ -81,13 +92,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="AI Scam Bot API", version="1.0.0", lifespan=lifespan)
 
-# Configure CORS
-# Configure allowed origins based on environment
-ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Local development
-    "https://your-frontend-domain.com",  # Production frontend
-]
-
 
 @app.get("/health")
 async def health_check():
@@ -105,10 +109,11 @@ async def root():
 @validate_model
 async def chat(request: ChatRequest):
     """Chat with the model using conversation history"""
-    global llm_model
+    global llm_model # TODO remove that 
+    # TODO : replace with single responsibility principle, and use a single function to handle each case (e.g., chat, generate, etc.)
 
     try:
-        start_time = time.time()
+        start_time = time.time() # TODO : UTC? ISR? 
         db = ensure_db_manager()
 
         # Set default values once
@@ -162,10 +167,9 @@ async def chat(request: ChatRequest):
         )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
-    except Exception as error:
+    except Exception as error: # TODO: not needed 
         logger.error(f"Chat error: {error}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Chat failed: {error}")
-
 
 @app.post("/conversations", response_model=ConversationResponse)
 async def create_conversation(request: ConversationRequest):
@@ -202,16 +206,16 @@ async def get_conversation_history(conversation_id: str, limit: int = 50):
 
 @app.get("/users/{user_id}/conversations")
 async def get_user_conversations(user_id: str, limit: int = 20):
-    """Get user's conversations"""
-    try:
-        db = ensure_db_manager()
-        conversations = await db.get_user_conversations(user_id, limit)
-        return {"user_id": user_id, "conversations": conversations}
-    except Exception as e:
-        logger.error(f"Error getting user conversations: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get conversations: {str(e)}"
-        )
+    """Get user's conversations""" # TODO remove unneeded commnnt if the function is clear and self-explanatory
+    db = ensure_db_manager() # TODO replace with ensure decorator
+    conversations = await db.get_user_conversations(user_id, limit)
+
+    if not conversations: 
+        raise HTTPException(status_code=404, detail="No conversations found")
+    
+    return {"user_id": user_id, "conversations": conversations}
+  
+        
 
 
 @app.get("/model/info")
