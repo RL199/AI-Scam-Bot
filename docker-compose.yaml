@@ -40,6 +40,7 @@ services:
     depends_on:
       - database
       - redis
+      - model
 
   frontend:
     build:
@@ -54,8 +55,28 @@ services:
     depends_on:
       - backend
 
+  model:
+    build:
+      context: .
+      dockerfile: dockers/model.dockerfile
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      # Set Ollama host explicitly
+      - OLLAMA_HOST=0.0.0.0:11434
+      # Set model download directory
+      - OLLAMA_MODELS=/root/.ollama/models
+    restart: on-failure
+    networks:
+      service_net:
+        ipv4_address: 172.18.0.6
+
 volumes:
   mysql_data:
+    driver: local
+  ollama_models:
     driver: local
 
 networks:
