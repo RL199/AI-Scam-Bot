@@ -1,13 +1,35 @@
-import aiomysql
-import logging
-from typing import Optional, List, Dict, Any
+# Python standard library imports
 import json
-from datetime import datetime
+import logging
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime
+from functools import wraps
+from typing import Optional, List, Dict, Any
+
+# Third-party package imports
+import aiomysql
+
+# Local imports
+# (none in this file)
+
 
 logger = logging.getLogger(__name__)
 
+# Constants
+VALID_MESSAGE_ROLES = ["user", "assistant", "system"]
+
+
+def ensure_pool_initialized(func):
+    """Decorator to check if database pool is initialized before method execution"""
+
+    @wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        if self.pool is None:
+            raise RuntimeError("Database connection pool is not initialized")
+        return await func(self, *args, **kwargs)
+
+    return wrapper
 
 class DatabaseManager:
     def __init__(
@@ -50,26 +72,33 @@ class DatabaseManager:
             await self.pool.wait_closed()
             logger.info("Database connection pool closed")
 
+    @ensure_pool_initialized
     async def create_conversation(
         self, user_id: Optional[str] = None, title: Optional[str] = None
     ) -> str:
         """Create a new conversation and return its ID"""
-        # TODO missing try except block to handle errors
         conversation_id = str(uuid.uuid4())
 
-        if self.pool is None: #TODO : create decorator to check if pool is initialized
-            raise RuntimeError("Database connection pool is not initialized")
+        try:
+            async with self.pool.acquire() as conn: # type: ignore
+                async with conn.cursor() as cursor:
+                    await cursor.execute(
+                        "INSERT INTO conversations (id, user_id, title) VALUES (%s, %s, %s)",
+                        (conversation_id, user_id, title),
+                    )
+                    await conn.commit()
 
-        async with self.pool.acquire() as conn:
-            async with conn.cursor() as cursor:
-                await cursor.execute(
-                    "INSERT INTO conversations (id, user_id, title) VALUES (%s, %s, %s)",
-                    (conversation_id, user_id, title),
-                )
+            logger.info(f"Created new conversation: {conversation_id}")
+            return conversation_id
 
-        logger.info(f"Created new conversation: {conversation_id}")
-        return conversation_id
+        except aiomysql.Error as error:
+            logger.error(f"Database error creating conversation {conversation_id}: {error}")
+            raise RuntimeError(f"Failed to create conversation: {error}")
+        except Exception as error:
+            logger.error(f"Unexpected error creating conversation {conversation_id}: {error}")
+            raise RuntimeError(f"Unexpected error creating conversation: {error}")
 
+    @ensure_pool_initialized
     async def save_message(
         self,
         conversation_id: str,
@@ -79,13 +108,12 @@ class DatabaseManager:
     ):
         """Save a message to the database"""
 
-        if role not in ["user", "assistant", "system"]: #TODO : move ["user", "assistant", "system"] to a constant variable to avoid duplication
-            raise ValueError(f"Invalid role: {role}. Must be one of: user, assistant, system")
+        if role not in VALID_MESSAGE_ROLES:
+            raise ValueError(
+                f"Invalid role: {role}. Must be one of: {', '.join(VALID_MESSAGE_ROLES)}"
+            )
 
-        if self.pool is None:
-            raise RuntimeError("Database connection pool is not initialized")
-
-        async with self.pool.acquire() as conn:
+        async with self.pool.acquire() as conn: # type: ignore
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     "INSERT INTO messages (conversation_id, role, content, metadata) VALUES (%s, %s, %s, %s)",
@@ -97,6 +125,7 @@ class DatabaseManager:
                     ),
                 )
 
+    @ensure_pool_initialized
     async def save_interaction_stats(
         self,
         conversation_id: str,
@@ -108,35 +137,43 @@ class DatabaseManager:
         response_tokens: int = 0,
     ):
         """Save interaction statistics"""
-        if self.pool is None:
-            raise RuntimeError("Database connection pool is not initialized")
 
-        async with self.pool.acquire() as conn: #TODO: missing try except block to handle errors everything with called third party library should be wrapped in try except block
-            async with conn.cursor() as cursor:
-                await cursor.execute(
-                    """INSERT INTO interaction_stats
-                       (conversation_id, generation_time_ms, model_name, temperature, max_length,
-                        prompt_tokens, response_tokens)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (
-                        conversation_id,
-                        generation_time_ms,
-                        model_name,
-                        temperature,
-                        max_length,
-                        prompt_tokens,
-                        response_tokens,
-                    ),
-                )
+        try:
+            async with self.pool.acquire() as conn: # type: ignore
+                async with conn.cursor() as cursor:
+                    await cursor.execute(
+                        """INSERT INTO interaction_stats
+                        (conversation_id, generation_time_ms, model_name, temperature, max_length,
+                            prompt_tokens, response_tokens)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                        (
+                            conversation_id,
+                            generation_time_ms,
+                            model_name,
+                            temperature,
+                            max_length,
+                            prompt_tokens,
+                            response_tokens,
+                        ),
+                    )
+                    await conn.commit()
 
+            logger.info(f"Saved interaction stats for conversation: {conversation_id}")
+
+        except aiomysql.Error as error:
+            logger.error(f"Database error saving interaction stats for conversation {conversation_id}: {error}")
+            raise RuntimeError(f"Failed to save interaction stats: {error}")
+        except Exception as error:
+            logger.error(f"Unexpected error saving interaction stats for conversation {conversation_id}: {error}")
+            raise RuntimeError(f"Unexpected error saving interaction stats: {error}")
+
+    @ensure_pool_initialized
     async def get_conversation_history(
         self, conversation_id: str, limit: int = 50
     ) -> List[Dict[str, Any]]:
         """Get conversation history"""
-        if self.pool is None:
-            raise RuntimeError("Database connection pool is not initialized")
 
-        async with self.pool.acquire() as conn:
+        async with self.pool.acquire() as conn: # type: ignore
             async with conn.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute(
                     """SELECT role, content, timestamp, metadata
@@ -148,14 +185,13 @@ class DatabaseManager:
                 )
                 return await cursor.fetchall()
 
+    @ensure_pool_initialized
     async def get_user_conversations(
         self, user_id: str, limit: int = 20
     ) -> List[Dict[str, Any]]:
         """Get user's conversations"""
-        if self.pool is None:
-            raise RuntimeError("Database connection pool is not initialized")
 
-        async with self.pool.acquire() as conn:
+        async with self.pool.acquire() as conn: # type: ignore
             async with conn.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute(
                     """SELECT id, title, created_at, updated_at

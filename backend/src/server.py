@@ -1,25 +1,27 @@
+# Python standard library imports
+import logging
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from functools import wraps
-import logging
-import time
 
+# Third-party package imports
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
+# Local imports
+from .model import LLMModel
+from database.database import DatabaseManager
 from models.models import (
-    GenerateResponse,
-    GenerateRequest,
-    ChatResponse,
     ChatRequest,
+    ChatResponse,
     ConversationRequest,
     ConversationResponse,
+    GenerateRequest,
+    GenerateResponse,
 )
-import uvicorn
 
-from model import LLMModel
-from database.database import DatabaseManager
-
-# TODO import structure python imports -> package imports -> local imports
 # TODO makefile for pylint and flake8
 # TODO: Solid principles -> check about it.
 
@@ -39,8 +41,6 @@ ALLOWED_ORIGINS = [
 ]
 
 
-
-
 def validate_model(func): # TODO move to utils.py or decorators.py
     """Decorator to validate that the LLM model is loaded before executing the endpoint"""
 
@@ -53,7 +53,7 @@ def validate_model(func): # TODO move to utils.py or decorators.py
 
     return wrapper
 
-# 
+#
 def ensure_db_manager(): # TODO move to utils.py or decorators.py
     """Helper function to ensure database manager is initialized"""
     global db_manager
@@ -109,11 +109,11 @@ async def root():
 @validate_model
 async def chat(request: ChatRequest):
     """Chat with the model using conversation history"""
-    global llm_model # TODO remove that 
+    global llm_model # TODO remove that
     # TODO : replace with single responsibility principle, and use a single function to handle each case (e.g., chat, generate, etc.)
 
     try:
-        start_time = time.time() # TODO : UTC? ISR? 
+        start_time = time.time() # UTC time
         db = ensure_db_manager()
 
         # Set default values once
@@ -167,7 +167,7 @@ async def chat(request: ChatRequest):
         )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
-    except Exception as error: # TODO: not needed 
+    except Exception as error: # TODO: not needed
         logger.error(f"Chat error: {error}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Chat failed: {error}")
 
@@ -210,12 +210,10 @@ async def get_user_conversations(user_id: str, limit: int = 20):
     db = ensure_db_manager() # TODO replace with ensure decorator
     conversations = await db.get_user_conversations(user_id, limit)
 
-    if not conversations: 
+    if not conversations:
         raise HTTPException(status_code=404, detail="No conversations found")
-    
+
     return {"user_id": user_id, "conversations": conversations}
-  
-        
 
 
 @app.get("/model/info")

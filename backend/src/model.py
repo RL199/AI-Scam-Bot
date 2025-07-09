@@ -1,13 +1,25 @@
-import ollama
-import logging
-from typing import List, Dict, Any
+# Python standard library imports
 import asyncio
+import logging
+from typing import List, Dict, Any, Optional
+
+# Third-party package imports
+import ollama
+
+# Local imports
+# (none in this file)
 
 class LLMModel:
-    def __init__(self, model_name: str = "llama3.2-vision:11b", logger: logging.logger = logging.getLogger(__name__), ollama_host: str = "http://localhost:11434"):
+
+    def __init__(
+        self,
+        model_name: str = "llama3.2-vision:11b",
+        logger: logging.Logger = logging.getLogger(__name__),
+        ollama_host: str = "http://localhost:11434",
+    ) -> None:
         self.logger = logger
         self.model_name = model_name
-        self.client = None
+        self.client: Optional[ollama.AsyncClient] = None
         self._loaded = False
         self.ollama_host = ollama_host
 
@@ -29,7 +41,7 @@ class LLMModel:
             self.logger.error(f"Failed to initialize Ollama model: {e}")
             raise
 
-    async def _ensure_model_available(self) -> None: #TODO make sure you have type hints for all functions
+    async def _ensure_model_available(self) -> None:
         """Ensure the model is downloaded and available"""
         if self.client is None:
             raise RuntimeError("Client not initialized")
@@ -37,8 +49,11 @@ class LLMModel:
         try:
             # List available models
             models = await self.client.list()
-            model_names = [model["name"] for model in models["models"]] #TODO if model or name doesnt exist this will raise an error, use .get() to avoid KeyError
-
+            model_names = [
+                model.get("name")
+                for model in models.get("models", [])
+                if model.get("name")
+            ]
             if self.model_name not in model_names:
                 self.logger.info(
                     f"Model {self.model_name} not found locally. Downloading..."
@@ -54,7 +69,6 @@ class LLMModel:
             raise
 
     def is_loaded(self) -> bool:
-        """Check if model is loaded"""
         return self._loaded and self.client is not None
 
     async def generate(
@@ -160,7 +174,7 @@ class LLMModel:
 
         return info
 
-    async def cleanup(self):
+    async def cleanup(self) -> None:
         """Cleanup Ollama client resources"""
         try:
             if self.client:
@@ -174,7 +188,7 @@ class LLMModel:
         except Exception as e:
             self.logger.error(f"Cleanup error: {e}")
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor to ensure cleanup"""
         if self._loaded:
             try:
