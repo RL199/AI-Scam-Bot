@@ -53,13 +53,35 @@ def validate_model(func): # TODO move to utils.py or decorators.py
 
     return wrapper
 
-#
-def ensure_db_manager(): # TODO move to utils.py or decorators.py
-    """Helper function to ensure database manager is initialized"""
-    global db_manager
-    if db_manager is None:
-        raise HTTPException(status_code=500, detail="Database manager not initialized")
-    return db_manager #TODO : if db_manager is None: tell the user that the database is not initialized, and that they should wait for the server to start up , meanwhile try again to set the DB manager if it failed\None.
+
+def ensure_db(func):
+    """Decorator to ensure database manager is available before executing the endpoint"""
+
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        global db_manager
+
+        if db_manager is None:
+            # Try to reinitialize the database manager
+            try:
+                logger.warning(
+                    "Database manager not initialized, attempting to reconnect..."
+                )
+                db_manager = DatabaseManager()
+                await db_manager.connect()
+                logger.info("Database manager reconnected successfully")
+            except Exception as e:
+                logger.error(f"Failed to reinitialize database manager: {e}")
+                raise HTTPException(
+                    status_code=503,
+                    detail="Database is not initialized. Please wait for the server to start up completely and try again.",
+                )
+
+        # Inject db_manager into kwargs for the function to use
+        kwargs["db"] = db_manager
+        return await func(*args, **kwargs)
+
+    return wrapper
 
 
 @asynccontextmanager
@@ -107,14 +129,14 @@ async def root():
 
 @app.post("/chat", response_model=ChatResponse)
 @validate_model
-async def chat(request: ChatRequest):
+@ensure_db
+async def chat(request: ChatRequest, db: DatabaseManager):
     """Chat with the model using conversation history"""
     global llm_model # TODO remove that
     # TODO : replace with single responsibility principle, and use a single function to handle each case (e.g., chat, generate, etc.)
 
     try:
         start_time = time.time() # UTC time
-        db = ensure_db_manager()
 
         # Set default values once
         temperature = (
@@ -167,15 +189,14 @@ async def chat(request: ChatRequest):
         )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
-    except Exception as error: # TODO: not needed
+    except Exception as error:
         logger.error(f"Chat error: {error}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Chat failed: {error}")
 
 @app.post("/conversations", response_model=ConversationResponse)
-async def create_conversation(request: ConversationRequest):
-    """Create a new conversation"""
+@ensure_db
+async def create_conversation(request: ConversationRequest, db: DatabaseManager):
     try:
-        db = ensure_db_manager()
         conversation_id = await db.create_conversation(
             user_id=request.user_id, title=request.title
         )
@@ -193,10 +214,9 @@ async def create_conversation(request: ConversationRequest):
 
 
 @app.get("/conversations/{conversation_id}/history")
-async def get_conversation_history(conversation_id: str, limit: int = 50):
-    """Get conversation history"""
+@ensure_db
+async def get_conversation_history(conversation_id: str, db: DatabaseManager, limit: int = 50):
     try:
-        db = ensure_db_manager()
         history = await db.get_conversation_history(conversation_id, limit)
         return {"conversation_id": conversation_id, "messages": history}
     except Exception as e:
@@ -205,9 +225,8 @@ async def get_conversation_history(conversation_id: str, limit: int = 50):
 
 
 @app.get("/users/{user_id}/conversations")
-async def get_user_conversations(user_id: str, limit: int = 20):
-    """Get user's conversations""" # TODO remove unneeded commnnt if the function is clear and self-explanatory
-    db = ensure_db_manager() # TODO replace with ensure decorator
+@ensure_db
+async def get_user_conversations(user_id: str, db: DatabaseManager, limit: int = 20):
     conversations = await db.get_user_conversations(user_id, limit)
 
     if not conversations:
