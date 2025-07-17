@@ -114,6 +114,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="AI Scam Bot API", version="1.0.0", lifespan=lifespan)
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/health")
 async def health_check():
