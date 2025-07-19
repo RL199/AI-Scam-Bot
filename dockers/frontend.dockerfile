@@ -1,25 +1,12 @@
 # Build stage
-FROM node:24-slim AS build
+FROM node:24-alpine3.21
 
 WORKDIR /app
-
-COPY frontend/package*.json ./
-RUN npm install
 
 COPY frontend/. .
+
+RUN npm install
 RUN npm run build
-
-# Production stage
-FROM node:24-slim
-
-WORKDIR /app
-
-# Copy built assets and package files
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/package*.json ./
-
-# Install only production dependencies for preview
-RUN npm install --only=production
 
 EXPOSE 3000
 

@@ -26,3 +26,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# front 
+node_modules/*
+frontend/node_modules/*
