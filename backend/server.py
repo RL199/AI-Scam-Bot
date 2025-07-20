@@ -1,5 +1,6 @@
 # Python standard library imports
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -11,7 +12,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 # Local imports
-from .model import LLMModel
+from model import LLMModel # type: ignore
 from database.database import DatabaseManager
 from models.models import (
     ChatRequest,
@@ -91,13 +92,15 @@ async def lifespan(app: FastAPI):
     global llm_model, db_manager
     try:
         logger.info("Loading LLM model...")
-        llm_model = LLMModel()
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        llm_model = LLMModel(ollama_host=ollama_host)
         await llm_model.load_model()
         logger.info("Model loaded successfully")
 
         # Initialize database
         logger.info("Connecting to database...")
-        db_manager = DatabaseManager()
+        db_host = os.getenv("DATABASE_HOST", "localhost")
+        db_manager = DatabaseManager(host=db_host)
         await db_manager.connect()
         logger.info("Database connected successfully")
     except Exception as e:

@@ -13,7 +13,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/. .
 
+ENV PYTHONPATH=/app
+# Configure service hosts for Docker network
+ENV DATABASE_HOST=database
+ENV OLLAMA_HOST=http://model:11434
+ENV REDIS_HOST=redis
+
 EXPOSE 8000
 
 # Start FastAPI app
-CMD ["sh", "-c", "uvicorn src.server:app --host 0.0.0.0 --port 8000"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]

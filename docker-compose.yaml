@@ -31,6 +31,10 @@ services:
     build:
       context: .
       dockerfile: dockers/backend.dockerfile
+    environment:
+      - DATABASE_HOST=database
+      - OLLAMA_HOST=http://model:11434
+      - REDIS_HOST=redis
     ports:
       - "8000:8000"
     restart: on-failure
