@@ -49,18 +49,18 @@ services:
       - redis
       - model
 
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: dockers/frontend.dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   restart: on-failure
-  #   networks:
-  #     service_net:
-  #       ipv4_address: 172.18.0.5
-  #   depends_on:
-  #     - backend
+  frontend:
+    build:
+      context: .
+      dockerfile: dockers/frontend.dockerfile
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    networks:
+      service_net:
+        ipv4_address: 172.18.0.5
+    depends_on:
+      - backend
 
   model:
     build:
