@@ -33,6 +33,9 @@ services:
       dockerfile: dockers/backend.dockerfile
     environment:
       - DATABASE_HOST=database
+      - DATABASE_USER=${MYSQL_USER:-scambot_user}
+      - DATABASE_PASSWORD=${MYSQL_PASSWORD}
+      - DATABASE_NAME=${MYSQL_DATABASE:-scambot_db}
       - OLLAMA_HOST=http://model:11434
       - REDIS_HOST=redis
     ports:

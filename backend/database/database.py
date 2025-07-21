@@ -1,6 +1,7 @@
 # Python standard library imports
 import json
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -31,39 +32,52 @@ def ensure_pool_initialized(func):
 
     return wrapper
 
+
 class DatabaseManager:
     def __init__(
         self,
-        host: str = "localhost",
-        port: int = 3306,
-        user: str = "scambot_user",
-        password: str = "scambot_password",
-        database: str = "scambot_db",
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        database: Optional[str] = None,
     ):
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
-        self.database = database
+        # Use environment variables with fallback to defaults - ensure no None values
+        self.host = host or os.getenv("DATABASE_HOST") or "localhost"
+        self.port = port or int(os.getenv("DATABASE_PORT", "3306"))
+        self.user = user or os.getenv("DATABASE_USER") or "scambot_user"
+        self.password = password or os.getenv("DATABASE_PASSWORD") or "scambot_password"
+        self.database = database or os.getenv("DATABASE_NAME") or "scambot_db"
         self.pool = None
 
     async def connect(self):
         """Initialize database connection pool"""
         try:
+            # Validate that all required parameters are strings
+            if not all(
+                isinstance(param, str)
+                for param in [self.host, self.user, self.password, self.database]
+            ):
+                raise ValueError(
+                    "All database connection parameters must be valid strings"
+                )
+
             self.pool = await aiomysql.create_pool(
                 host=self.host,
                 port=self.port,
                 user=self.user,
                 password=self.password,
                 db=self.database,
-                autocommit=False,
                 minsize=1,
                 maxsize=10,
+                autocommit=True,
             )
-            logger.info("Database connection pool created successfully")
-        except aiomysql.Error as error:
-            logger.error(f"Error creating database connection pool: {error}")
-            raise RuntimeError(f"Failed to connect to database: {error}")
+            logger.info(
+                f"Database connection pool created successfully for {self.user}@{self.host}:{self.port}/{self.database}"
+            )
+        except Exception as e:
+            logger.error(f"Error creating database connection pool: {e}")
+            raise RuntimeError(f"Failed to connect to database: {e}")
 
     async def disconnect(self):
         """Close database connection pool"""
@@ -80,7 +94,7 @@ class DatabaseManager:
         conversation_id = str(uuid.uuid4())
 
         try:
-            async with self.pool.acquire() as conn: # type: ignore
+            async with self.pool.acquire() as conn:  # type: ignore
                 async with conn.cursor() as cursor:
                     await cursor.execute(
                         "INSERT INTO conversations (id, user_id, title) VALUES (%s, %s, %s)",
@@ -92,10 +106,14 @@ class DatabaseManager:
             return conversation_id
 
         except aiomysql.Error as error:
-            logger.error(f"Database error creating conversation {conversation_id}: {error}")
+            logger.error(
+                f"Database error creating conversation {conversation_id}: {error}"
+            )
             raise RuntimeError(f"Failed to create conversation: {error}")
         except Exception as error:
-            logger.error(f"Unexpected error creating conversation {conversation_id}: {error}")
+            logger.error(
+                f"Unexpected error creating conversation {conversation_id}: {error}"
+            )
             raise RuntimeError(f"Unexpected error creating conversation: {error}")
 
     @ensure_pool_initialized
@@ -113,7 +131,7 @@ class DatabaseManager:
                 f"Invalid role: {role}. Must be one of: {', '.join(VALID_MESSAGE_ROLES)}"
             )
 
-        async with self.pool.acquire() as conn: # type: ignore
+        async with self.pool.acquire() as conn:  # type: ignore
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     "INSERT INTO messages (conversation_id, role, content, metadata) VALUES (%s, %s, %s, %s)",
@@ -139,7 +157,7 @@ class DatabaseManager:
         """Save interaction statistics"""
 
         try:
-            async with self.pool.acquire() as conn: # type: ignore
+            async with self.pool.acquire() as conn:  # type: ignore
                 async with conn.cursor() as cursor:
                     await cursor.execute(
                         """INSERT INTO interaction_stats
@@ -161,10 +179,14 @@ class DatabaseManager:
             logger.info(f"Saved interaction stats for conversation: {conversation_id}")
 
         except aiomysql.Error as error:
-            logger.error(f"Database error saving interaction stats for conversation {conversation_id}: {error}")
+            logger.error(
+                f"Database error saving interaction stats for conversation {conversation_id}: {error}"
+            )
             raise RuntimeError(f"Failed to save interaction stats: {error}")
         except Exception as error:
-            logger.error(f"Unexpected error saving interaction stats for conversation {conversation_id}: {error}")
+            logger.error(
+                f"Unexpected error saving interaction stats for conversation {conversation_id}: {error}"
+            )
             raise RuntimeError(f"Unexpected error saving interaction stats: {error}")
 
     @ensure_pool_initialized
@@ -173,7 +195,7 @@ class DatabaseManager:
     ) -> List[Dict[str, Any]]:
         """Get conversation history"""
 
-        async with self.pool.acquire() as conn: # type: ignore
+        async with self.pool.acquire() as conn:  # type: ignore
             async with conn.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute(
                     """SELECT role, content, timestamp, metadata
@@ -191,7 +213,7 @@ class DatabaseManager:
     ) -> List[Dict[str, Any]]:
         """Get user's conversations"""
 
-        async with self.pool.acquire() as conn: # type: ignore
+        async with self.pool.acquire() as conn:  # type: ignore
             async with conn.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute(
                     """SELECT id, title, created_at, updated_at

@@ -18,3 +18,4 @@ redis == 5.2.0            # Synchronous Redis client for Python database operati
 aiomysql == 0.2.0         # Async MySQL client for database operations
 sqlalchemy == 2.0.36      # SQL toolkit and ORM for database operations
 alembic == 1.14.0         # Database migration tool for SQLAlchemy
+cryptography == 45.0.5    # Library for cryptographic operations, used for secure data handling

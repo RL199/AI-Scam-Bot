@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 # Local imports
-from model import LLMModel # type: ignore
+from model import LLMModel  # type: ignore
 from database.database import DatabaseManager
 from models.models import (
     ChatRequest,
@@ -42,7 +42,7 @@ ALLOWED_ORIGINS = [
 ]
 
 
-def validate_model(func): # TODO move to utils.py or decorators.py
+def validate_model(func):  # TODO move to utils.py or decorators.py
     """Decorator to validate that the LLM model is loaded before executing the endpoint"""
 
     @wraps(func)
@@ -56,8 +56,7 @@ def validate_model(func): # TODO move to utils.py or decorators.py
 
 
 def ensure_db(func):
-    """Decorator to ensure database manager is available before executing the endpoint"""
-
+    """Decorator to ensure database manager is available and inject it into the function"""
     @wraps(func)
     async def wrapper(*args, **kwargs):
         global db_manager
@@ -65,9 +64,7 @@ def ensure_db(func):
         if db_manager is None:
             # Try to reinitialize the database manager
             try:
-                logger.warning(
-                    "Database manager not initialized, attempting to reconnect..."
-                )
+                logger.warning("Database manager not initialized, attempting to reconnect...")
                 db_manager = DatabaseManager()
                 await db_manager.connect()
                 logger.info("Database manager reconnected successfully")
@@ -78,8 +75,8 @@ def ensure_db(func):
                     detail="Database is not initialized. Please wait for the server to start up completely and try again.",
                 )
 
-        # Inject db_manager into kwargs for the function to use
-        kwargs["db"] = db_manager
+        # Inject db_manager into function locals for the function to use
+        func.__globals__['db'] = db_manager
         return await func(*args, **kwargs)
 
     return wrapper
@@ -97,10 +94,9 @@ async def lifespan(app: FastAPI):
         await llm_model.load_model()
         logger.info("Model loaded successfully")
 
-        # Initialize database
+        # Initialize database - no need to pass host since it reads from env
         logger.info("Connecting to database...")
-        db_host = os.getenv("DATABASE_HOST", "localhost")
-        db_manager = DatabaseManager(host=db_host)
+        db_manager = DatabaseManager()
         await db_manager.connect()
         logger.info("Database connected successfully")
     except Exception as e:
@@ -142,13 +138,13 @@ async def root():
 @app.post("/chat", response_model=ChatResponse)
 @validate_model
 @ensure_db
-async def chat(request: ChatRequest, db: DatabaseManager):
+async def chat(request: ChatRequest):
     """Chat with the model using conversation history"""
-    global llm_model # TODO remove that
+    global llm_model  # TODO remove that
     # TODO : replace with single responsibility principle, and use a single function to handle each case (e.g., chat, generate, etc.)
 
     try:
-        start_time = time.time() # UTC time
+        start_time = time.time()  # UTC time
 
         # Set default values once
         temperature = (
@@ -205,9 +201,10 @@ async def chat(request: ChatRequest, db: DatabaseManager):
         logger.error(f"Chat error: {error}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Chat failed: {error}")
 
+
 @app.post("/conversations", response_model=ConversationResponse)
 @ensure_db
-async def create_conversation(request: ConversationRequest, db: DatabaseManager):
+async def create_conversation(request: ConversationRequest, db):
     try:
         conversation_id = await db.create_conversation(
             user_id=request.user_id, title=request.title
@@ -227,7 +224,7 @@ async def create_conversation(request: ConversationRequest, db: DatabaseManager)
 
 @app.get("/conversations/{conversation_id}/history")
 @ensure_db
-async def get_conversation_history(conversation_id: str, db: DatabaseManager, limit: int = 50):
+async def get_conversation_history(conversation_id: str, db, limit: int = 50):
     try:
         history = await db.get_conversation_history(conversation_id, limit)
         return {"conversation_id": conversation_id, "messages": history}
@@ -238,7 +235,7 @@ async def get_conversation_history(conversation_id: str, db: DatabaseManager, li
 
 @app.get("/users/{user_id}/conversations")
 @ensure_db
-async def get_user_conversations(user_id: str, db: DatabaseManager, limit: int = 20):
+async def get_user_conversations(user_id: str, db, limit: int = 20):
     conversations = await db.get_user_conversations(user_id, limit)
 
     if not conversations:
