@@ -13,7 +13,7 @@ class LLMModel:
 
     def __init__(
         self,
-        model_name: str = "llama3.2-vision:11b",
+        model_name: str = "llama3.2:3b",
         logger: logging.Logger = logging.getLogger(__name__),
         ollama_host: str = "http://localhost:11434",
     ) -> None:
