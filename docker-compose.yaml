@@ -75,10 +75,20 @@ services:
       - OLLAMA_HOST=0.0.0.0:11434
       # Set model download directory
       - OLLAMA_MODELS=/root/.ollama/models
+      # Enable GPU support
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     restart: on-failure
     networks:
       service_net:
         ipv4_address: 172.18.0.6
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 volumes:
   mysql_data:

@@ -9,7 +9,7 @@ from functools import wraps
 from typing import Optional, List, Dict, Any
 
 # Third-party package imports
-import aiomysql
+import aiomysql # type: ignore
 
 # Local imports
 # (none in this file)
@@ -224,3 +224,17 @@ class DatabaseManager:
                     (user_id, limit),
                 )
                 return await cursor.fetchall()
+
+    @ensure_pool_initialized
+    async def get_conversation(self, conversation_id: str) -> Optional[Dict[str, Any]]:
+        """Get a specific conversation by ID"""
+        async with self.pool.acquire() as conn:  # type: ignore
+            async with conn.cursor(aiomysql.DictCursor) as cursor:
+                await cursor.execute(
+                    """SELECT id, user_id, title, created_at, updated_at
+                       FROM conversations
+                       WHERE id = %s""",
+                    (conversation_id,),
+                )
+                result = await cursor.fetchone()
+                return result

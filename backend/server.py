@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import wraps
 
 # Third-party package imports
-import uvicorn
+import uvicorn # type: ignore
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -157,14 +157,23 @@ async def chat(request: ChatRequest):
         # Create conversation if not provided
         conversation_id = request.conversation_id
         if not conversation_id:
-            conversation_id = await db.create_conversation(
+            conversation_id = await db.create_conversation( # type: ignore
                 user_id=request.user_id, title=f"Chat {len(request.messages)} messages"
             )
+        else:
+            # Verify the conversation exists if provided
+            existing_conversation = await db.get_conversation(conversation_id) # type: ignore
+            if not existing_conversation:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Conversation {conversation_id} not found"
+                )
+
 
         # Save user messages to database
         for msg in request.messages:
             if msg.role == "user":
-                await db.save_message(
+                await db.save_message( # type: ignore
                     conversation_id=conversation_id, role=msg.role, content=msg.content
                 )
 
@@ -182,13 +191,13 @@ async def chat(request: ChatRequest):
         )
 
         # Save assistant response to database
-        await db.save_message(
+        await db.save_message( # type: ignore
             conversation_id=conversation_id, role="assistant", content=response
         )
 
         # Save interaction statistics
         generation_time = int((time.time() - start_time) * 1000)
-        await db.save_interaction_stats(
+        await db.save_interaction_stats( # type: ignore
             conversation_id=conversation_id,
             generation_time_ms=generation_time,
             model_name=llm_model.model_name,
@@ -204,9 +213,9 @@ async def chat(request: ChatRequest):
 
 @app.post("/conversations", response_model=ConversationResponse)
 @ensure_db
-async def create_conversation(request: ConversationRequest, db):
+async def create_conversation(request: ConversationRequest):
     try:
-        conversation_id = await db.create_conversation(
+        conversation_id = await db.create_conversation( # type: ignore
             user_id=request.user_id, title=request.title
         )
 
@@ -224,9 +233,9 @@ async def create_conversation(request: ConversationRequest, db):
 
 @app.get("/conversations/{conversation_id}/history")
 @ensure_db
-async def get_conversation_history(conversation_id: str, db, limit: int = 50):
+async def get_conversation_history(conversation_id: str, limit: int = 50):
     try:
-        history = await db.get_conversation_history(conversation_id, limit)
+        history = await db.get_conversation_history(conversation_id, limit) # type: ignore
         return {"conversation_id": conversation_id, "messages": history}
     except Exception as e:
         logger.error(f"Error getting conversation history: {e}")
@@ -235,8 +244,8 @@ async def get_conversation_history(conversation_id: str, db, limit: int = 50):
 
 @app.get("/users/{user_id}/conversations")
 @ensure_db
-async def get_user_conversations(user_id: str, db, limit: int = 20):
-    conversations = await db.get_user_conversations(user_id, limit)
+async def get_user_conversations(user_id: str, limit: int = 20):
+    conversations = await db.get_user_conversations(user_id, limit) # type: ignore
 
     if not conversations:
         raise HTTPException(status_code=404, detail="No conversations found")
