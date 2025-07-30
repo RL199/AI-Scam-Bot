@@ -1,4 +1,5 @@
 # Python standard library imports
+import asyncio
 import logging
 import os
 import time
@@ -91,8 +92,22 @@ async def lifespan(app: FastAPI):
         logger.info("Loading LLM model...")
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         llm_model = LLMModel(ollama_host=ollama_host)
-        await llm_model.load_model()
-        logger.info("Model loaded successfully")
+
+        # Retry model loading with exponential backoff
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                await llm_model.load_model()
+                logger.info("Model loaded successfully")
+                break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # Exponential backoff: 1, 2, 4, 8, 16 seconds
+                    logger.warning(f"Model loading attempt {attempt + 1} failed: {e}. Retrying in {wait_time} seconds...")
+                    await asyncio.sleep(wait_time)
+                else:
+                    logger.error(f"Failed to load model after {max_retries} attempts: {e}")
+                    raise
 
         # Initialize database - no need to pass host since it reads from env
         logger.info("Connecting to database...")

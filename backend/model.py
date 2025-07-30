@@ -13,7 +13,7 @@ class LLMModel:
 
     def __init__(
         self,
-        model_name: str = "llama3.2:3b",
+        model_name: str = "ITModel",
         logger: logging.Logger = logging.getLogger(__name__),
         ollama_host: str = "http://localhost:11434",
     ) -> None:
@@ -56,11 +56,24 @@ class LLMModel:
             ]
             if self.model_name not in model_names:
                 self.logger.info(
-                    f"Model {self.model_name} not found locally. Downloading..."
+                    f"Model {self.model_name} not found locally. Checking if it's a custom model..."
                 )
-                # Pull the model if not available
-                await self.client.pull(self.model_name)
-                self.logger.info(f"Model {self.model_name} downloaded successfully")
+
+                # For custom models like ITModel, we need to wait for them to be created
+                # rather than trying to pull them
+                if self.model_name == "ITModel":
+                    self.logger.info(
+                        f"Custom model {self.model_name} not found. It should be created by the model service."
+                    )
+                    # Don't try to pull custom models - they should be created by the model service
+                    return
+                else:
+                    # Pull the model if it's a standard model
+                    self.logger.info(
+                        f"Model {self.model_name} not found locally. Downloading..."
+                    )
+                    await self.client.pull(self.model_name)
+                    self.logger.info(f"Model {self.model_name} downloaded successfully")
             else:
                 self.logger.info(f"Model {self.model_name} is available locally")
 

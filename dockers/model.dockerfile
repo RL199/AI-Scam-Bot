@@ -6,8 +6,10 @@ COPY model/requirements.txt .
 
 COPY model/. .
 
+COPY backend/models/Modelfile ./Modelfile
+
 EXPOSE 11434
 
 # Start Ollama service
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["ollama serve & sleep 5 && ollama pull llama3.2:3b && tail -f /dev/null"]
+CMD ["ollama serve & sleep 10 && ollama pull llama3.2:3b && ollama create ITModel -f ./Modelfile && echo 'ITModel created successfully' && tail -f /dev/null"]
