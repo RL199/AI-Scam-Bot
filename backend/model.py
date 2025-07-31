@@ -87,9 +87,6 @@ class LLMModel:
     async def generate(
         self,
         prompt: str,
-        max_length: int = 256,
-        temperature: float = 0.7,
-        top_p: float = 0.9,
     ) -> str:
         """Generate text from a prompt using Ollama"""
         if not self.is_loaded():
@@ -102,12 +99,6 @@ class LLMModel:
             response = await self.client.generate(
                 model=self.model_name,
                 prompt=prompt,
-                options={
-                    "temperature": temperature,
-                    "top_p": top_p,
-                    "num_predict": max_length,  # Ollama's equivalent to max_length
-                    "stop": ["\n\n", "User:", "Human:"],  # Stop sequences
-                },
             )
 
             return response["response"].strip()
@@ -119,8 +110,6 @@ class LLMModel:
     async def chat(
         self,
         messages: List[Dict[str, str]],
-        max_length: int = 256,
-        temperature: float = 0.7,
     ) -> str:
         """Chat with conversation history using Ollama's chat API"""
         if not self.is_loaded():
@@ -145,7 +134,6 @@ class LLMModel:
             response = await self.client.chat(
                 model=self.model_name,
                 messages=ollama_messages,
-                options={"temperature": temperature, "num_predict": max_length},
             )
 
             return response["message"]["content"].strip()

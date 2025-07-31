@@ -23,23 +23,12 @@ class ChatRole(str, Enum):
 # Pydantic models for request/response
 class GenerateRequest(BaseModel):
     prompt: str
-    max_length: Optional[int] = 256
-    temperature: Optional[float] = 0.7
-    top_p: Optional[float] = 0.9
 
     @field_validator("prompt")
     def validate_prompt(cls, value):
         if not isinstance(value, str) or len(value.strip()) > 256 or len(value.strip()) <= 0:
             raise ValueError("Prompt must be a non-empty string.")
         return value.strip()
-
-    @field_validator("max_length")
-    @classmethod
-    def validate_max_length(cls, value):
-        if value is not None:
-            if value < 1 or value > 1024:  # Reasonable bounds
-                raise ValueError("max_length must be between 1 and 1024")
-        return value
 
 
 class ChatMessage(BaseModel):
@@ -61,8 +50,6 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[ChatMessage]
-    max_length: Optional[int] = 256
-    temperature: Optional[float] = 0.7
     conversation_id: Optional[str] = None
     user_id: Optional[str] = None
 

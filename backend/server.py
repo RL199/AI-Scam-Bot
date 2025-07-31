@@ -31,9 +31,6 @@ from models.models import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Default values for model parameters #TODO move it to config.py or .env file or .config file
-DEFAULT_TEMPERATURE = 0.7
-DEFAULT_MAX_LENGTH = 256
 
 # Configure CORS
 # Configure allowed origins based on environment
@@ -161,14 +158,6 @@ async def chat(request: ChatRequest):
     try:
         start_time = time.time()  # UTC time
 
-        # Set default values once
-        temperature = (
-            DEFAULT_TEMPERATURE if request.temperature is None else request.temperature
-        )
-        max_length = (
-            DEFAULT_MAX_LENGTH if request.max_length is None else request.max_length
-        )
-
         # Create conversation if not provided
         conversation_id = request.conversation_id
         if not conversation_id:
@@ -183,7 +172,6 @@ async def chat(request: ChatRequest):
                     status_code=404,
                     detail=f"Conversation {conversation_id} not found"
                 )
-
 
         # Save user messages to database
         for msg in request.messages:
@@ -201,8 +189,6 @@ async def chat(request: ChatRequest):
 
         response = await llm_model.chat(
             messages=messages_dict,
-            max_length=max_length,
-            temperature=temperature,
         )
 
         # Save assistant response to database
@@ -212,12 +198,12 @@ async def chat(request: ChatRequest):
 
         # Save interaction statistics
         generation_time = int((time.time() - start_time) * 1000)
-        await db.save_interaction_stats( # type: ignore
+        await db.save_interaction_stats(  # type: ignore
             conversation_id=conversation_id,
             generation_time_ms=generation_time,
             model_name=llm_model.model_name,
-            temperature=temperature,
-            max_length=max_length,
+            temperature=0.6,  # Fixed value from Modelfile
+            max_length=9192,  # Fixed value from Modelfile (num_ctx)
         )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
