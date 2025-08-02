@@ -4,18 +4,5 @@
 		"name": "AI Scam Bot",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
-	"item": [
-		{
-			"name": "New Request",
-			"id": "46911770-deeff517-d33c-4b9c-b3b0-2e2b0c2b1c94",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": []
-			},
-			"response": []
-		}
-	]
+	"item": []
 }
