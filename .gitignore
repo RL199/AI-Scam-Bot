@@ -22,11 +22,11 @@ logs/
 Thumbs.db
 
 # IDE files
-.vscode/settings.json
+.vscode/
 .idea/
 *.swp
 *.swo
 
-# front 
+# front
 node_modules/*
 frontend/node_modules/*
