@@ -17,7 +17,6 @@ ENV PYTHONPATH=/app
 # Configure service hosts for Docker network
 ENV DATABASE_HOST=database
 ENV OLLAMA_HOST=http://model:11434
-ENV REDIS_HOST=redis
 
 EXPOSE 8000
 
