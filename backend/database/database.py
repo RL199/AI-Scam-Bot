@@ -237,4 +237,18 @@ class DatabaseManager:
                     (conversation_id,),
                 )
                 result = await cursor.fetchone()
+                print(result)
+
                 return result
+
+    @ensure_pool_initialized
+    async def get_message_count(self, conversation_id: str) -> int:
+        """Get the number of messages in a conversation"""
+        async with self.pool.acquire() as conn:  # type: ignore
+            async with conn.cursor() as cursor:
+                await cursor.execute(
+                    """SELECT COUNT(*) FROM messages WHERE conversation_id = %s""",
+                    (conversation_id,),
+                )
+                result = await cursor.fetchone()
+                return result[0] if result else 0

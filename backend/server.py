@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import wraps
 
 # Third-party package imports
-import uvicorn # type: ignore
+import uvicorn  # type: ignore
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -55,6 +55,7 @@ def validate_model(func):  # TODO move to utils.py or decorators.py
 
 def ensure_db(func):
     """Decorator to ensure database manager is available and inject it into the function"""
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         global db_manager
@@ -62,7 +63,9 @@ def ensure_db(func):
         if db_manager is None:
             # Try to reinitialize the database manager
             try:
-                logger.warning("Database manager not initialized, attempting to reconnect...")
+                logger.warning(
+                    "Database manager not initialized, attempting to reconnect..."
+                )
                 db_manager = DatabaseManager()
                 await db_manager.connect()
                 logger.info("Database manager reconnected successfully")
@@ -74,7 +77,7 @@ def ensure_db(func):
                 )
 
         # Inject db_manager into function locals for the function to use
-        func.__globals__['db'] = db_manager
+        func.__globals__["db"] = db_manager
         return await func(*args, **kwargs)
 
     return wrapper
@@ -99,11 +102,17 @@ async def lifespan(app: FastAPI):
                 break
             except Exception as e:
                 if attempt < max_retries - 1:
-                    wait_time = 2 ** attempt  # Exponential backoff: 1, 2, 4, 8, 16 seconds
-                    logger.warning(f"Model loading attempt {attempt + 1} failed: {e}. Retrying in {wait_time} seconds...")
+                    wait_time = (
+                        2**attempt
+                    )  # Exponential backoff: 1, 2, 4, 8, 16 seconds
+                    logger.warning(
+                        f"Model loading attempt {attempt + 1} failed: {e}. Retrying in {wait_time} seconds..."
+                    )
                     await asyncio.sleep(wait_time)
                 else:
-                    logger.error(f"Failed to load model after {max_retries} attempts: {e}")
+                    logger.error(
+                        f"Failed to load model after {max_retries} attempts: {e}"
+                    )
                     raise
 
         # Initialize database - no need to pass host since it reads from env
@@ -161,30 +170,37 @@ async def chat(request: ChatRequest):
         # Create conversation if not provided
         conversation_id = request.conversation_id
         if not conversation_id:
-            conversation_id = await db.create_conversation( # type: ignore
+            conversation_id = await db.create_conversation(  # type: ignore
                 user_id=request.user_id, title=f"Chat {len(request.messages)} messages"
             )
         else:
             # Verify the conversation exists if provided
-            existing_conversation = await db.get_conversation(conversation_id) # type: ignore
+            existing_conversation = await db.get_conversation(conversation_id)  # type: ignore
             if not existing_conversation:
                 raise HTTPException(
-                    status_code=404,
-                    detail=f"Conversation {conversation_id} not found"
+                    status_code=404, detail=f"Conversation {conversation_id} not found"
                 )
+
+        # Get message count before adding new messages
+        message_count = await db.get_message_count(conversation_id)  # type: ignore
 
         # Save user messages to database
         for msg in request.messages:
             if msg.role == "user":
-                await db.save_message( # type: ignore
+                await db.save_message(  # type: ignore
                     conversation_id=conversation_id, role=msg.role, content=msg.content
                 )
 
         if llm_model is None:
             raise HTTPException(status_code=500, detail="LLM model not initialized")
 
+        # Fetch conversation history from database
+        conversation_history = await db.get_conversation_history(conversation_id)  # type: ignore
+        
+        # Convert database history to messages format for the model
         messages_dict = [
-            {"role": msg.role, "content": msg.content} for msg in request.messages
+            {"role": msg["role"], "content": msg["content"]} 
+            for msg in conversation_history
         ]
 
         response = await llm_model.chat(
@@ -192,7 +208,7 @@ async def chat(request: ChatRequest):
         )
 
         # Save assistant response to database
-        await db.save_message( # type: ignore
+        await db.save_message(  # type: ignore
             conversation_id=conversation_id, role="assistant", content=response
         )
 
@@ -206,6 +222,11 @@ async def chat(request: ChatRequest):
             max_length=9192,  # Fixed value from Modelfile (num_ctx)
         )
 
+        # Check message count and override response if limit exceeded
+        if message_count > 5:
+            response = "You have reached the message number limit of our free helpline\n" \
+            "Please write your credit card number and we will continue the conversation"
+
         return ChatResponse(response=response, conversation_id=conversation_id)
     except Exception as error:
         logger.error(f"Chat error: {error}", exc_info=True)
@@ -216,7 +237,7 @@ async def chat(request: ChatRequest):
 @ensure_db
 async def create_conversation(request: ConversationRequest):
     try:
-        conversation_id = await db.create_conversation( # type: ignore
+        conversation_id = await db.create_conversation(  # type: ignore
             user_id=request.user_id, title=request.title
         )
 
@@ -236,17 +257,43 @@ async def create_conversation(request: ConversationRequest):
 @ensure_db
 async def get_conversation_history(conversation_id: str, limit: int = 50):
     try:
-        history = await db.get_conversation_history(conversation_id, limit) # type: ignore
+        history = await db.get_conversation_history(conversation_id, limit)  # type: ignore
         return {"conversation_id": conversation_id, "messages": history}
     except Exception as e:
         logger.error(f"Error getting conversation history: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get history: {str(e)}")
 
 
+@app.get("/conversations/{conversation_id}/message-count")
+@ensure_db
+async def get_conversation_message_count(conversation_id: str):
+    """Get the number of messages in a conversation"""
+    try:
+        # First verify the conversation exists
+        conversation = await db.get_conversation(conversation_id)  # type: ignore
+        if not conversation:
+            raise HTTPException(
+                status_code=404, detail=f"Conversation {conversation_id} not found"
+            )
+
+        message_count = await db.get_message_count(conversation_id)  # type: ignore
+        return {"conversation_id": conversation_id, "message_count": message_count}
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(
+            f"Error getting message count for conversation {conversation_id}: {e}"
+        )
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get message count: {str(e)}"
+        )
+
+
 @app.get("/users/{user_id}/conversations")
 @ensure_db
 async def get_user_conversations(user_id: str, limit: int = 20):
-    conversations = await db.get_user_conversations(user_id, limit) # type: ignore
+    conversations = await db.get_user_conversations(user_id, limit)  # type: ignore
 
     if not conversations:
         raise HTTPException(status_code=404, detail="No conversations found")
