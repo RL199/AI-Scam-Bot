@@ -1,8 +1,18 @@
 services:
-  redis:
-    image: redis
+  database:
+    build:
+      context: .
+      dockerfile: dockers/database.dockerfile
+    environment:
+      # Secure credential handling - in .env file
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-scambot_db}
+      - MYSQL_USER=${MYSQL_USER:-scambot_user}
+    volumes:
+      - mysql_data:/var/lib/mysql
     ports:
-      - "6379:6379"
+      - "3306:3306"
     restart: on-failure
     networks:
       service_net:
@@ -12,14 +22,21 @@ services:
     build:
       context: .
       dockerfile: dockers/backend.dockerfile
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_USER=${MYSQL_USER:-scambot_user}
+      - DATABASE_PASSWORD=${MYSQL_PASSWORD}
+      - DATABASE_NAME=${MYSQL_DATABASE:-scambot_db}
+      - OLLAMA_HOST=http://model:11434
     ports:
       - "8000:8000"
     restart: on-failure
     networks:
       service_net:
-        ipv4_address: 172.18.0.3
+        ipv4_address: 172.18.0.4
     depends_on:
-      - redis
+      - database
+      - model
 
   frontend:
     build:
@@ -30,9 +47,44 @@ services:
     restart: on-failure
     networks:
       service_net:
-        ipv4_address: 172.18.0.4
+        ipv4_address: 172.18.0.5
     depends_on:
       - backend
+
+  model:
+    build:
+      context: .
+      dockerfile: dockers/model.dockerfile
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      # Set Ollama host explicitly
+      - OLLAMA_HOST=0.0.0.0:11434
+      # Set model download directory
+      - OLLAMA_MODELS=/root/.ollama/models
+      # Enable GPU support
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    restart: on-failure
+    networks:
+      service_net:
+        ipv4_address: 172.18.0.6
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  mysql_data:
+    driver: local
+  ollama_models:
+    driver: local
+
 networks:
   service_net:
     driver: bridge
