@@ -1,20 +1,37 @@
 # AI Scam Bot Simulator
-## A Cybersecurity Research & Training Tool
+## A Cybersecurity Research & Training Tool for IT Support Phishing Detection
 
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](https://docker.com/)
 
 ## Overview
 
-This project provides a controlled environment for simulating scam-like chatbot behavior using state-of-the-art LLaMA-based language models. It is **exclusively designed for cybersecurity research, training, and educational purposes** to help security professionals identify, analyze, and develop defenses against AI-generated social engineering attacks.
+This project provides a controlled environment for simulating AI-powered phishing attacks that impersonate IT support personnel. The system uses state-of-the-art language models through Ollama to create realistic social engineering scenarios for cybersecurity education and training. It is **exclusively designed for cybersecurity coursework, research, and educational purposes** to help security professionals and students identify, analyze, and develop defenses against AI-generated phishing attacks that pose as legitimate IT support.
 
 ### Technical Stack
 
-- `transformers` (Hugging Face) - For model interaction and inference
-- `torch` (PyTorch) - For tensor operations and model execution
-- `FastAPI` - For lightweight API endpoints
-- LLaMA or similar foundation models - For text generation
+**Backend:**
+- **FastAPI** - Lightweight, high-performance API framework
+- **Ollama** - Local LLM inference server for model hosting
+- **MySQL** - Persistent database for conversation storage
+
+**Frontend:**
+- **React 19.1.1** - Modern UI framework with TypeScript support
+- **Vite** - Fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework
+
+**AI/ML:**
+- **LLaMA** - Foundation language model for text generation
+- **Ollama API** - Model inference and management
+- **Custom prompt engineering** - Specialized for IT support impersonation
+
+**Infrastructure:**
+- **Docker & Docker Compose** - Containerized deployment
+- **NGINX** (optional) - Reverse proxy and load balancing
+- **GPU Support** - NVIDIA GPU acceleration for model inference
 
 ## Research Objectives
 
@@ -40,27 +57,75 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 
 ## Features
 
-- Configurable simulation of various social engineering tactics
-- Customizable response templates and interaction flows
-- Comprehensive logging for research analysis
-- FastAPI server for integration with testing frameworks
-- Support for multiple open-source LLMs (LLaMA 2, GPT-J, etc.)
-- Sandboxed execution environment
+- **AI-Powered IT Support Simulation** - Realistic chatbot impersonating IT helpdesk personnel
+- **Conversation Management** - Persistent conversation storage with message history
+- **Rate Limiting & Security Controls** - Built-in message limits and ethical safeguards
+- **Comprehensive API** - RESTful endpoints for chat, conversation management, and analytics
+- **Real-time Model Information** - Health checks and model status monitoring
+- **Database Analytics** - Interaction statistics and conversation tracking
+- **Docker Containerization** - Easy deployment with full service orchestration
+- **GPU Acceleration** - NVIDIA GPU support for faster model inference
+- **CORS Security** - Configurable cross-origin resource sharing
+- **Research-Focused Logging** - Detailed logs for cybersecurity analysis
 
 ## Installation
+
+### Prerequisites
+
+- Docker and Docker Compose
+- NVIDIA GPU (optional, for accelerated inference)
+
+### Quick Start with Docker
 
 ```bash
 # Clone the repository
 git clone https://github.com/RL199/AI-Scam-Bot.git
 cd AI-Scam-Bot
 
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Create environment file
+cp .env.example .env
+# Edit .env with your database credentials
 
-# Install dependencies
-pip install -r requirements.txt
+# Start all services
+docker-compose up -d
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000
+# API Documentation: http://localhost:8000/docs
 ```
+
+
+### Environment Configuration
+
+Create a `.env` file in the root directory with:
+
+```env
+MYSQL_ROOT_PASSWORD=your_root_password
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=scambot_db
+MYSQL_USER=scambot_user
+OLLAMA_HOST=http://localhost:11434
+```
+
+## API Endpoints
+
+- `GET /health` - Health check and model status
+- `POST /chat` - Chat with the AI model
+- `POST /conversations` - Create new conversation
+- `GET /conversations/{id}/history` - Get conversation history
+- `GET /conversations/{id}/message-count` - Get message count
+- `GET /users/{id}/conversations` - Get user conversations
+- `GET /model/info` - Model information
+
+## Usage
+
+1. Start the services using Docker Compose
+2. Access the frontend at `http://localhost:3000`
+3. Begin a conversation with the AI IT support simulator
+4. Analyze the interaction patterns for research purposes
+
+**Note:** The system implements message limits to demonstrate common phishing tactics where attackers escalate requests for sensitive information after establishing trust.
 
 ## Citation
 
