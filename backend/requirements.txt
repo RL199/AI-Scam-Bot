@@ -1,21 +1,17 @@
-aioredis == 2.0.1            # Async Redis client for Python, enables non-blocking Redis operations
-black == 25.1.0              # Code formatter that automatically formats Python code to PEP 8 standards
-fakeredis == 2.29.0          # In-memory Redis server implementation for testing without real Redis
+# black == 25.1.0              # Code formatter that automatically formats Python code to PEP 8 standards
 fastapi == 0.115.12          # Modern web framework for building APIs with automatic documentation
-flake8 == 7.2.0              # Code linter that checks for style guide enforcement and programming errors
-httpx == 0.28.1              # HTTP client library with async support, modern alternative to requests
-pylint == 3.3.7              # Static code analyzer that checks for errors and code quality issues
-pytest == 8.3.5              # Testing framework for writing and running unit tests
-requests == 2.32.3           # Simple HTTP library for making web requests and API calls
+# flake8 == 7.2.0              # Code linter that checks for style guide enforcement and programming errors
+# httpx == 0.28.1              # HTTP client library with async support, modern alternative to requests
+# pylint == 3.3.7              # Static code analyzer that checks for errors and code quality issues
+# pytest == 8.3.5              # Testing framework for writing and running unit tests
 uvicorn[standard] == 0.34.2  # ASGI server for running FastAPI applications with extra features
 ollama == 0.5.1              # Ollama client for interacting with large language models
 pydantic == 2.10.4           # Data validation library using Python type annotations
-python-multipart == 0.0.20   # Parser for multipart/form-data, used for file uploads in FastAPI
-jinja2 == 3.1.5              # Template engine for generating dynamic HTML or text content
-redis == 5.2.0               # Synchronous Redis client for Python database operations
+# python-multipart == 0.0.20   # Parser for multipart/form-data, used for file uploads in FastAPI
+# jinja2 == 3.1.5              # Template engine for generating dynamic HTML or text content
 
 # Database dependencies:
 aiomysql == 0.2.0            # Async MySQL client for database operations
-sqlalchemy == 2.0.36         # SQL toolkit and ORM for database operations
-alembic == 1.14.0            # Database migration tool for SQLAlchemy
+# sqlalchemy == 2.0.36         # SQL toolkit and ORM for database operations
+# alembic == 1.14.0            # Database migration tool for SQLAlchemy
 cryptography == 45.0.5       # Library for cryptographic operations, used for secure data handling

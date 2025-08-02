@@ -18,15 +18,6 @@ services:
       service_net:
         ipv4_address: 172.18.0.2
 
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"
-    restart: on-failure
-    networks:
-      service_net:
-        ipv4_address: 172.18.0.3
-
   backend:
     build:
       context: .
@@ -37,7 +28,6 @@ services:
       - DATABASE_PASSWORD=${MYSQL_PASSWORD}
       - DATABASE_NAME=${MYSQL_DATABASE:-scambot_db}
       - OLLAMA_HOST=http://model:11434
-      - REDIS_HOST=redis
     ports:
       - "8000:8000"
     restart: on-failure
@@ -46,7 +36,6 @@ services:
         ipv4_address: 172.18.0.4
     depends_on:
       - database
-      - redis
       - model
 
   frontend:
