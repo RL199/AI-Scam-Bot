@@ -88,7 +88,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
       timeout: 10s
-      retries: 5
+      retries: 20
       interval: 30s
       start_period: 60s
     deploy:

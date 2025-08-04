@@ -1,7 +1,7 @@
 FROM ollama/ollama:0.9.5
 
-# Install envsubst for environment variable substitution
-RUN apt-get update && apt-get install -y gettext-base && rm -rf /var/lib/apt/lists/*
+# Install envsubst for environment variable substitution and curl for health checks
+RUN apt-get update && apt-get install -y gettext-base curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
