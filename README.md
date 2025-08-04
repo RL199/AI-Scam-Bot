@@ -119,9 +119,6 @@ MYSQL_PASSWORD=your_password
 MYSQL_DATABASE=scambot_db
 MYSQL_USER=scambot_user
 
-# Frontend configuration
-VITE_API_BASE_URL=http://localhost:8000
-
 # AI Model configuration
 OLLAMA_HOST=http://localhost:11434
 ```
