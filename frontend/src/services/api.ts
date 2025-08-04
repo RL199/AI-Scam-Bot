@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from "axios";
 import {
   ChatRequest,
   ChatResponse,
@@ -6,15 +6,16 @@ import {
   ConversationResponse,
   HealthResponse,
   MessageCountResponse,
-} from '../types/api';
+} from "../types/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -22,7 +23,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     return Promise.reject(error);
   }
 );
@@ -30,24 +31,35 @@ api.interceptors.response.use(
 export const apiService = {
   // Health check
   healthCheck: async (): Promise<HealthResponse> => {
-    const response: AxiosResponse<HealthResponse> = await api.get('/health');
+    const response: AxiosResponse<HealthResponse> = await api.get("/health");
     return response.data;
   },
 
   // Chat with the AI assistant
   chat: async (request: ChatRequest): Promise<ChatResponse> => {
-    const response: AxiosResponse<ChatResponse> = await api.post('/chat', request);
+    const response: AxiosResponse<ChatResponse> = await api.post(
+      "/chat",
+      request
+    );
     return response.data;
   },
 
   // Create a new conversation
-  createConversation: async (request: ConversationRequest): Promise<ConversationResponse> => {
-    const response: AxiosResponse<ConversationResponse> = await api.post('/conversations', request);
+  createConversation: async (
+    request: ConversationRequest
+  ): Promise<ConversationResponse> => {
+    const response: AxiosResponse<ConversationResponse> = await api.post(
+      "/conversations",
+      request
+    );
     return response.data;
   },
 
   // Get conversation history
-  getConversationHistory: async (conversationId: string, limit: number = 50) => {
+  getConversationHistory: async (
+    conversationId: string,
+    limit: number = 50
+  ) => {
     const response = await api.get(`/conversations/${conversationId}/history`, {
       params: { limit },
     });
@@ -55,7 +67,9 @@ export const apiService = {
   },
 
   // Get message count for a conversation
-  getMessageCount: async (conversationId: string): Promise<MessageCountResponse> => {
+  getMessageCount: async (
+    conversationId: string
+  ): Promise<MessageCountResponse> => {
     const response: AxiosResponse<MessageCountResponse> = await api.get(
       `/conversations/${conversationId}/message-count`
     );
@@ -72,7 +86,7 @@ export const apiService = {
 
   // Get model information
   getModelInfo: async () => {
-    const response = await api.get('/model/info');
+    const response = await api.get("/model/info");
     return response.data;
   },
 };

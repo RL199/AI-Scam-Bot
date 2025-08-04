@@ -2,8 +2,11 @@
 ## A Cybersecurity Research & Training Tool for IT Support Phishing Detection
 
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.4-blue.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.0.6-purple.svg)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.3-cyan.svg)](https://tailwindcss.com/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](https://docker.com/)
 
@@ -20,8 +23,9 @@ This project provides a controlled environment for simulating AI-powered phishin
 
 **Frontend:**
 - **React 19.1.1** - Modern UI framework with TypeScript support
-- **Vite** - Fast build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework
+- **Vite 7.0.6** - Fast build tool and development server
+- **Tailwind CSS 3.4.3** - Utility-first CSS framework for professional UI design
+- **TypeScript 5.8.4** - Type-safe development with modern language features
 
 **AI/ML:**
 - **LLaMA** - Foundation language model for text generation
@@ -58,7 +62,11 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 ## Features
 
 - **AI-Powered IT Support Simulation** - Realistic chatbot impersonating IT helpdesk personnel
+- **Professional User Interface** - Modern, responsive design with professional IT support appearance
+- **Real-time Typing Indicators** - Visual feedback showing when the AI is "typing" responses
 - **Conversation Management** - Persistent conversation storage with message history
+- **Session Management** - Automatic session creation and tracking with unique identifiers
+- **Enhanced User Experience** - Auto-focus input field, responsive design, and smooth interactions
 - **Rate Limiting & Security Controls** - Built-in message limits and ethical safeguards
 - **Comprehensive API** - RESTful endpoints for chat, conversation management, and analytics
 - **Real-time Model Information** - Health checks and model status monitoring
@@ -67,6 +75,7 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 - **GPU Acceleration** - NVIDIA GPU support for faster model inference
 - **CORS Security** - Configurable cross-origin resource sharing
 - **Research-Focused Logging** - Detailed logs for cybersecurity analysis
+- **Centralized Configuration** - Single environment file for all service configuration
 
 ## Installation
 
@@ -82,17 +91,18 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 git clone https://github.com/RL199/AI-Scam-Bot.git
 cd AI-Scam-Bot
 
-# Create environment file
+# Create environment file from example
 cp .env.example .env
-# Edit .env with your database credentials
+# Edit .env with your secure database credentials and configuration
 
-# Start all services
+# Start all services (database, backend, frontend, AI model)
 docker-compose up -d
 
 # Access the application
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:8000
 # API Documentation: http://localhost:8000/docs
+# Model API: http://localhost:11434
 ```
 
 
@@ -101,10 +111,18 @@ docker-compose up -d
 Create a `.env` file in the root directory with:
 
 ```env
+# Database credentials (required)
 MYSQL_ROOT_PASSWORD=your_root_password
 MYSQL_PASSWORD=your_password
+
+# Database configuration (optional - defaults are set)
 MYSQL_DATABASE=scambot_db
 MYSQL_USER=scambot_user
+
+# Frontend configuration
+VITE_API_BASE_URL=http://localhost:8000
+
+# AI Model configuration
 OLLAMA_HOST=http://localhost:11434
 ```
 

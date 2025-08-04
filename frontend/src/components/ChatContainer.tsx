@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { ChatMessage } from '../types/api';
-import { apiService } from '../services/api';
-import Header from './Header';
-import Message from './Message';
-import ChatInput from './ChatInput';
-import TypingIndicator from './TypingIndicator';
+import React, { useState, useEffect, useRef } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { ChatMessage } from "../types/api";
+import { apiService } from "../services/api";
+import Header from "./Header";
+import Message from "./Message";
+import ChatInput from "./ChatInput";
+import TypingIndicator from "./TypingIndicator";
 
 const ChatContainer: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -18,7 +18,7 @@ const ChatContainer: React.FC = () => {
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const ChatContainer: React.FC = () => {
         await apiService.healthCheck();
         setIsConnected(true);
       } catch (error) {
-        console.error('Health check failed:', error);
+        console.error("Health check failed:", error);
         setIsConnected(false);
       }
     };
@@ -47,7 +47,7 @@ const ChatContainer: React.FC = () => {
   useEffect(() => {
     if (isConnected && messages.length === 0) {
       const welcomeMessage: ChatMessage = {
-        role: 'assistant',
+        role: "assistant",
         content: `Welcome to TechSupport Pro! 👋
 
 I'm your dedicated IT Support specialist, ready to help you resolve any technical challenges you're facing.
@@ -67,7 +67,7 @@ I'm your dedicated IT Support specialist, ready to help you resolve any technica
 - Include error messages or codes if you see any
 - Let me know what device and operating system you're using
 
-How can I help you today? Please describe your technical issue in detail.`
+How can I help you today? Please describe your technical issue in detail.`,
       };
       setMessages([welcomeMessage]);
     }
@@ -75,18 +75,20 @@ How can I help you today? Please describe your technical issue in detail.`
 
   const handleSendMessage = async (messageContent: string) => {
     if (!isConnected) {
-      alert('Connection to IT support is currently unavailable. Please try again later.');
+      alert(
+        "Connection to IT support is currently unavailable. Please try again later."
+      );
       return;
     }
 
     const userMessage: ChatMessage = {
-      role: 'user',
+      role: "user",
       content: messageContent,
     };
 
     // Add user message to chat
-    setMessages(prev => [...prev, userMessage]);
-    setMessageCount(prev => prev + 1);
+    setMessages((prev) => [...prev, userMessage]);
+    setMessageCount((prev) => prev + 1);
     setIsTyping(true);
 
     try {
@@ -94,7 +96,7 @@ How can I help you today? Please describe your technical issue in detail.`
       if (!conversationId) {
         const conversationResponse = await apiService.createConversation({
           user_id: userId,
-          title: 'IT Support Session - ' + new Date().toLocaleDateString()
+          title: "IT Support Session - " + new Date().toLocaleDateString(),
         });
         setConversationId(conversationResponse.conversation_id);
       }
@@ -108,21 +110,20 @@ How can I help you today? Please describe your technical issue in detail.`
 
       // Add assistant response
       const assistantMessage: ChatMessage = {
-        role: 'assistant',
+        role: "assistant",
         content: response.response,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
       // Update conversation ID if it was created during this request
       if (!conversationId) {
         setConversationId(response.conversation_id);
       }
-
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       const errorMessage: ChatMessage = {
-        role: 'assistant',
+        role: "assistant",
         content: `I apologize, but I'm experiencing technical difficulties at the moment. This could be due to:
 
 • High server load
@@ -136,7 +137,7 @@ How can I help you today? Please describe your technical issue in detail.`
 
 Our human support team is standing by to assist you. Thank you for your patience! 🔧`,
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
@@ -145,17 +146,29 @@ Our human support team is standing by to assist you. Thank you for your patience
   return (
     <div className="chat-container">
       <Header isConnected={isConnected} />
-      
+
       {/* Connection Status Banner */}
       {!isConnected && (
         <div className="bg-warning-50 border-l-4 border-warning-500 text-warning-800 p-4">
           <div className="flex items-center">
-            <svg className="w-5 h-5 mr-3 animate-spin" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 mr-3 animate-spin"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                clipRule="evenodd"
+              />
             </svg>
             <div>
-              <p className="font-medium">Establishing secure connection to IT support...</p>
-              <p className="text-sm mt-1">Please wait while we connect you to our support team.</p>
+              <p className="font-medium">
+                Establishing secure connection to IT support...
+              </p>
+              <p className="text-sm mt-1">
+                Please wait while we connect you to our support team.
+              </p>
             </div>
           </div>
         </div>
@@ -165,10 +178,12 @@ Our human support team is standing by to assist you. Thank you for your patience
       <div className="chat-messages scrollbar-thin">
         <div className="max-w-4xl mx-auto">
           {messages.map((message, index) => (
-            <Message 
-              key={index} 
+            <Message
+              key={index}
               message={message}
-              timestamp={new Date(Date.now() - (messages.length - index - 1) * 60000)}
+              timestamp={
+                new Date(Date.now() - (messages.length - index - 1) * 60000)
+              }
             />
           ))}
           {isTyping && <TypingIndicator />}
@@ -180,7 +195,9 @@ Our human support team is standing by to assist you. Thank you for your patience
       <div className="bg-secondary-50 border-t border-secondary-200 px-6 py-2">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-xs text-secondary-600">
           <div className="flex items-center space-x-4">
-            <span>Session ID: {conversationId?.slice(-8) || 'Send message first'}</span>
+            <span>
+              Session ID: {conversationId?.slice(-8) || "Send message first"}
+            </span>
             <span>Messages: {messageCount}</span>
             <span>Technician: AI Assistant</span>
           </div>
@@ -199,11 +216,11 @@ Our human support team is standing by to assist you. Thank you for your patience
         onSendMessage={handleSendMessage}
         disabled={!isConnected || isTyping}
         placeholder={
-          !isConnected 
-            ? "Establishing connection to IT support..." 
-            : isTyping 
-              ? "Please wait for technician response..." 
-              : "Describe your technical issue in detail..."
+          !isConnected
+            ? "Establishing connection to IT support..."
+            : isTyping
+            ? "Please wait for technician response..."
+            : "Describe your technical issue in detail..."
         }
       />
     </div>
