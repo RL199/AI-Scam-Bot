@@ -91,7 +91,8 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Loading LLM model...")
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        llm_model = LLMModel(ollama_host=ollama_host)
+        model_name = os.getenv("OLLAMA_MODEL", "ITModel")
+        llm_model = LLMModel(model_name=model_name, ollama_host=ollama_host)
 
         # Retry model loading with exponential backoff
         max_retries = 5

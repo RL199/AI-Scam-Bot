@@ -1,4 +1,4 @@
-FROM llama3.2
+FROM ${OLLAMA_MODEL}
 
 PARAMETER num_ctx 9192
 PARAMETER repeat_last_n 128
