@@ -198,10 +198,10 @@ class DatabaseManager:
         async with self.pool.acquire() as conn:  # type: ignore
             async with conn.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute(
-                    """SELECT role, content, timestamp, metadata
+                    """SELECT role, content, created_at, metadata
                        FROM messages
                        WHERE conversation_id = %s
-                       ORDER BY timestamp ASC
+                       ORDER BY created_at ASC
                        LIMIT %s""",
                     (conversation_id, limit),
                 )
