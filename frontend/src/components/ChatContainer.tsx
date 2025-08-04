@@ -15,6 +15,7 @@ const ChatContainer: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<number | null>(null);
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -73,6 +74,15 @@ How can I help you today? Please describe your technical issue in detail.`,
     }
   }, [isConnected, messages.length]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSendMessage = async (messageContent: string) => {
     if (!isConnected) {
       alert(
@@ -89,7 +99,20 @@ How can I help you today? Please describe your technical issue in detail.`,
     // Add user message to chat
     setMessages((prev) => [...prev, userMessage]);
     setMessageCount((prev) => prev + 1);
-    setIsTyping(true);
+
+    // Clear any existing typing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Start the API call immediately but don't show results until minimum delay
+    const startTime = Date.now();
+    const minimumDelay = 10000; // 10 seconds minimum for human-like timing
+
+    // Show typing indicator after a short delay
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(true);
+    }, 3000); // Show typing after 3 seconds
 
     try {
       // Create conversation if it doesn't exist
@@ -108,6 +131,13 @@ How can I help you today? Please describe your technical issue in detail.`,
         user_id: userId,
       });
 
+      // Calculate how much time has passed
+      const elapsed = Date.now() - startTime;
+      const remainingDelay = Math.max(0, minimumDelay - elapsed);
+
+      // Wait for the remaining time to ensure minimum delay
+      await new Promise(resolve => setTimeout(resolve, remainingDelay));
+
       // Add assistant response
       const assistantMessage: ChatMessage = {
         role: "assistant",
@@ -122,6 +152,14 @@ How can I help you today? Please describe your technical issue in detail.`,
       }
     } catch (error) {
       console.error("Error sending message:", error);
+
+      // Calculate how much time has passed for error case too
+      const elapsed = Date.now() - startTime;
+      const remainingDelay = Math.max(0, minimumDelay - elapsed);
+
+      // Wait for the remaining time to ensure minimum delay even for errors
+      await new Promise(resolve => setTimeout(resolve, remainingDelay));
+
       const errorMessage: ChatMessage = {
         role: "assistant",
         content: `I apologize, but I'm experiencing technical difficulties at the moment. This could be due to:
@@ -139,6 +177,10 @@ Our human support team is standing by to assist you. Thank you for your patience
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
+      // Clear timeout and hide typing indicator
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
       setIsTyping(false);
     }
   };
