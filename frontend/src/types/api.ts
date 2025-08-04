@@ -1,18 +1,10 @@
 export interface ChatMessage {
-  id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp: string;
-  status?: 'sending' | 'delivered' | 'failed';
 }
 
 export interface ChatRequest {
-  messages: Array<{
-    role: 'user' | 'assistant' | 'system';
-    content: string;
-  }>;
-  max_length?: number;
-  temperature?: number;
+  messages: ChatMessage[];
   conversation_id?: string;
   user_id?: string;
 }
@@ -31,4 +23,15 @@ export interface ConversationResponse {
   conversation_id: string;
   title?: string;
   created_at: string;
+}
+
+export interface HealthResponse {
+  status: string;
+  model_status: string;
+  api_version: string;
+}
+
+export interface MessageCountResponse {
+  conversation_id: string;
+  message_count: number;
 }
