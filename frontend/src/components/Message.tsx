@@ -9,9 +9,9 @@ interface MessageProps {
 // Helper function to render markdown bold syntax
 const renderMessageContent = (content: string) => {
   const parts = content.split(/(\*\*.*?\*\*)/g);
-  
+
   return parts.map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
+    if (part.startsWith("**") && part.endsWith("**")) {
       const boldText = part.slice(2, -2);
       return <strong key={index}>{boldText}</strong>;
     }
@@ -29,18 +29,18 @@ const Message: React.FC<MessageProps> = ({ message, timestamp }) => {
     <div
       className={`message-container flex ${
         isUser ? "justify-end" : "justify-start"
-      } mb-4`}
+      } mb-3 sm:mb-4`}
     >
       <div
-        className={`flex max-w-sm lg:max-w-md ${
+        className={`flex max-w-[85%] sm:max-w-sm lg:max-w-md ${
           isUser ? "flex-row-reverse" : "flex-row"
         } items-end space-x-2`}
       >
         {!isUser && (
           <div className="flex-shrink-0 mb-1">
-            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary-100 rounded-full flex items-center justify-center">
               <svg
-                className="w-4 h-4 text-primary-600"
+                className="w-3 h-3 sm:w-4 sm:h-4 text-primary-600"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -58,7 +58,7 @@ const Message: React.FC<MessageProps> = ({ message, timestamp }) => {
           className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
         >
           <div className={`${isUser ? "message-user" : "message-assistant"}`}>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
               {renderMessageContent(message.content)}
             </p>
           </div>
@@ -76,7 +76,7 @@ const Message: React.FC<MessageProps> = ({ message, timestamp }) => {
 
         {isUser && (
           <div className="flex-shrink-0 mb-1">
-            <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
               U
             </div>
           </div>

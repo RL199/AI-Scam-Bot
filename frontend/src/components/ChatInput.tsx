@@ -63,8 +63,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className="chat-input-container">
       <div className="chat-input-wrapper">
-        <form onSubmit={handleSubmit} className="flex items-end space-x-4">
-          {" "}
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-end space-x-2 sm:space-x-4"
+        >
           <div className="flex-1">
             <div className="relative">
               <textarea
@@ -75,20 +77,23 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 placeholder={placeholder}
                 disabled={disabled}
                 rows={1}
-                className="input-field resize-none min-h-[48px] pr-12"
-                style={{ paddingRight: "3rem" }}
+                className="input-field resize-none min-h-[44px] sm:min-h-[48px] pr-10 sm:pr-12 text-sm sm:text-base"
+                style={{ paddingRight: "2.5rem" }}
               />
               {message.length > 0 && (
-                <div className="absolute right-3 bottom-3 text-xs text-secondary-400">
+                <div className="absolute right-2 sm:right-3 bottom-2 sm:bottom-3 text-xs text-secondary-400">
                   {message.length}/500
                 </div>
               )}
             </div>
             <div className="flex items-center justify-between mt-2 text-xs text-secondary-500">
-              <span>Press Enter to send, Shift+Enter for new line</span>
+              <span className="hidden sm:block">
+                Press Enter to send, Shift+Enter for new line
+              </span>
+              <span className="sm:hidden">Tap send or press Enter</span>
               {disabled && (
                 <span className="text-warning-600 font-medium">
-                  Please wait for response...
+                  Please wait...
                 </span>
               )}
             </div>
@@ -96,11 +101,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
           <button
             type="submit"
             disabled={disabled || !message.trim() || message.length > 500}
-            className="btn-primary flex items-center justify-center min-w-[48px] h-[48px]"
+            className="btn-primary flex items-center justify-center min-w-[44px] h-[44px] sm:min-w-[48px] sm:h-[48px] touch-manipulation"
             title="Send message"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -116,8 +121,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
           </button>
         </form>
 
-        <div className="flex items-center justify-between mt-3 text-xs text-secondary-500">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between mt-2 sm:mt-3 text-xs text-secondary-500">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <span className="flex items-center space-x-1">
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -126,7 +131,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Secure chat</span>
+              <span className="hidden sm:inline">Secure chat</span>
+              <span className="sm:hidden">Secure</span>
             </span>
             <span className="flex items-center space-x-1">
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -136,10 +142,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>End-to-end encrypted</span>
+              <span className="hidden sm:inline">End-to-end encrypted</span>
+              <span className="sm:hidden">Encrypted</span>
             </span>
           </div>
-          <span>TechSupport Pro v2.1</span>
+          <span className="hidden sm:inline">TechSupport Pro v2.1</span>
+          <span className="sm:hidden">v2.1</span>
         </div>
       </div>
     </div>

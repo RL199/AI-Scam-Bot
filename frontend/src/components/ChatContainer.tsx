@@ -149,10 +149,10 @@ Our human support team is standing by to assist you. Thank you for your patience
 
       {/* Connection Status Banner */}
       {!isConnected && (
-        <div className="bg-warning-50 border-l-4 border-warning-500 text-warning-800 p-4">
+        <div className="bg-warning-50 border-l-4 border-warning-500 text-warning-800 p-3 sm:p-4">
           <div className="flex items-center">
             <svg
-              className="w-5 h-5 mr-3 animate-spin"
+              className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 animate-spin flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -162,11 +162,11 @@ Our human support team is standing by to assist you. Thank you for your patience
                 clipRule="evenodd"
               />
             </svg>
-            <div>
-              <p className="font-medium">
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm sm:text-base">
                 Establishing secure connection to IT support...
               </p>
-              <p className="text-sm mt-1">
+              <p className="text-xs sm:text-sm mt-1">
                 Please wait while we connect you to our support team.
               </p>
             </div>
@@ -192,20 +192,24 @@ Our human support team is standing by to assist you. Thank you for your patience
       </div>
 
       {/* Session Info */}
-      <div className="bg-secondary-50 border-t border-secondary-200 px-6 py-2">
+      <div className="bg-secondary-50 border-t border-secondary-200 px-3 sm:px-6 py-2">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-xs text-secondary-600">
-          <div className="flex items-center space-x-4">
-            <span>
-              Session ID: {conversationId?.slice(-8) || "Send message first"}
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+            <span className="truncate">
+              ID: {conversationId?.slice(-8) || "Send message first"}
             </span>
-            <span>Messages: {messageCount}</span>
-            <span>Technician: AI Assistant</span>
+            <span className="hidden sm:inline">Messages: {messageCount}</span>
+            <span className="sm:hidden">Msgs: {messageCount}</span>
+            <span className="hidden sm:inline">Technician: AI Assistant</span>
+            <span className="sm:hidden truncate">AI Tech</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <span>Response Time: Excellent</span>
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+            <span className="hidden sm:inline">Response Time: Excellent</span>
+            <span className="sm:hidden">Fast</span>
             <span className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-success-500 rounded-full"></div>
-              <span>Secure Connection</span>
+              <span className="hidden sm:inline">Secure Connection</span>
+              <span className="sm:hidden">Secure</span>
             </span>
           </div>
         </div>

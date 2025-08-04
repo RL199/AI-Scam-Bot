@@ -23,28 +23,50 @@
         height: 100%;
         margin: 0;
         padding: 0;
+        /* Prevent zoom on double tap on mobile */
+        touch-action: manipulation;
+        /* Improve text rendering on mobile */
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    /* Better mobile scrolling */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Focus styles for better accessibility */
+    *:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+    }
+
+    /* Remove focus outline for mouse users */
+    .js-focus-visible *:focus:not(.focus-visible) {
+        outline: none;
     }
 }
 
 @layer components {
     .message-user {
-        @apply bg-primary-600 text-white rounded-2xl rounded-br-md px-4 py-3 max-w-sm ml-auto shadow-message;
+        @apply bg-primary-600 text-white rounded-2xl rounded-br-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85%] sm:max-w-sm ml-auto shadow-message;
     }
 
     .message-assistant {
-        @apply bg-white text-secondary-800 rounded-2xl rounded-bl-md px-4 py-3 max-w-sm mr-auto shadow-message border border-secondary-100;
+        @apply bg-white text-secondary-800 rounded-2xl rounded-bl-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85%] sm:max-w-sm mr-auto shadow-message border border-secondary-100;
     }
 
     .btn-primary {
-        @apply bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 disabled:cursor-not-allowed shadow-soft hover:shadow-lg focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:outline-none;
+        @apply bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 disabled:cursor-not-allowed shadow-soft hover:shadow-lg focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:outline-none touch-manipulation;
     }
 
     .btn-secondary {
-        @apply bg-white hover:bg-secondary-50 text-secondary-700 font-medium px-6 py-3 rounded-xl transition-all duration-200 border border-secondary-200 hover:border-secondary-300 shadow-soft hover:shadow-lg focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 focus:outline-none;
+        @apply bg-white hover:bg-secondary-50 text-secondary-700 font-medium px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 border border-secondary-200 hover:border-secondary-300 shadow-soft hover:shadow-lg focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 focus:outline-none touch-manipulation;
     }
 
     .input-field {
-        @apply w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 bg-white shadow-soft placeholder-secondary-400 text-secondary-900;
+        @apply w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 bg-white shadow-soft placeholder-secondary-400 text-secondary-900 touch-manipulation;
     }
 
     .typing-indicator {
@@ -89,7 +111,7 @@
     }
 
     .chat-messages {
-        @apply flex-1 overflow-y-auto p-6 space-y-4;
+        @apply flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4;
         background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
     }
 
@@ -98,7 +120,7 @@
     }
 
     .chat-input-wrapper {
-        @apply max-w-4xl mx-auto p-4;
+        @apply max-w-4xl mx-auto p-3 sm:p-4;
     }
 
     .message-container {
@@ -134,5 +156,63 @@
 
     .scrollbar-thin::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
+    }
+
+    /* Mobile-specific improvements */
+    @media (max-width: 640px) {
+        .chat-container {
+            height: 100vh;
+            height: 100dvh;
+            /* Dynamic viewport height for mobile browsers */
+        }
+
+        .chat-messages {
+            /* Account for mobile browsers' dynamic viewport */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .chat-input-container {
+            /* Add safe area padding for devices with notches */
+            padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+        }
+
+        /* Improve touch targets */
+        button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* Better textarea experience on mobile */
+        textarea {
+            font-size: 16px;
+            /* Prevents zoom on iOS */
+        }
+
+        /* Hide scrollbars on mobile for cleaner look */
+        .scrollbar-thin::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-thin {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    }
+
+    /* Focus improvements for mobile */
+    @media (max-width: 640px) {
+        *:focus {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    }
+
+    /* Reduce animations on mobile to improve performance */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 }
