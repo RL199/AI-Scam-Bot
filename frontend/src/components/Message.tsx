@@ -6,6 +6,19 @@ interface MessageProps {
   timestamp?: Date;
 }
 
+// Helper function to render markdown bold syntax
+const renderMessageContent = (content: string) => {
+  const parts = content.split(/(\*\*.*?\*\*)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const boldText = part.slice(2, -2);
+      return <strong key={index}>{boldText}</strong>;
+    }
+    return part;
+  });
+};
+
 const Message: React.FC<MessageProps> = ({ message, timestamp }) => {
   const isUser = message.role === "user";
   const timeString = timestamp
@@ -46,7 +59,7 @@ const Message: React.FC<MessageProps> = ({ message, timestamp }) => {
         >
           <div className={`${isUser ? "message-user" : "message-assistant"}`}>
             <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              {message.content}
+              {renderMessageContent(message.content)}
             </p>
           </div>
 
