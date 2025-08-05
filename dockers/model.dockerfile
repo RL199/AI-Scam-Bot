@@ -5,8 +5,6 @@ RUN apt-get update && apt-get install -y gettext-base curl && rm -rf /var/lib/ap
 
 WORKDIR /app
 
-COPY model/. .
-
 COPY backend/models/Modelfile ./Modelfile
 
 EXPOSE 11434
