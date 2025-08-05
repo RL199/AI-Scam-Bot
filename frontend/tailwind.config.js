@@ -48,7 +48,7 @@ export default {
                 },
             },
             animation: {
-                'typing': 'typing 1.5s infinite',
+                'typing': 'typing 1.4s infinite ease-in-out',
                 'fade-in': 'fadeIn 0.3s ease-in',
                 'slide-up': 'slideUp 0.3s ease-out',
                 'bounce-slow': 'bounce 2s infinite',
@@ -56,9 +56,14 @@ export default {
             },
             keyframes: {
                 typing: {
-                    '0%': { opacity: 0.4 },
-                    '50%': { opacity: 1 },
-                    '100%': { opacity: 0.4 },
+                    '0%, 60%, 100%': { 
+                        transform: 'translateY(0)', 
+                        opacity: '0.4' 
+                    },
+                    '30%': { 
+                        transform: 'translateY(-10px)', 
+                        opacity: '1' 
+                    },
                 },
                 fadeIn: {
                     '0%': { opacity: 0 },
