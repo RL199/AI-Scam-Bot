@@ -6,9 +6,12 @@ interface MessageProps {
   timestamp?: Date;
 }
 
-// Helper function to render markdown bold syntax
+// Helper function to render markdown bold syntax and filter out <think> sections
 const renderMessageContent = (content: string) => {
-  const parts = content.split(/(\*\*.*?\*\*)/g);
+  // Remove <think>...</think> sections (including the tags themselves)
+  const cleanedContent = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  
+  const parts = cleanedContent.split(/(\*\*.*?\*\*)/g);
 
   return parts.map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {
