@@ -56,13 +56,13 @@ export default {
             },
             keyframes: {
                 typing: {
-                    '0%, 60%, 100%': { 
-                        transform: 'translateY(0)', 
-                        opacity: '0.4' 
+                    '0%, 60%, 100%': {
+                        transform: 'translateY(0)',
+                        opacity: '0.4'
                     },
-                    '30%': { 
-                        transform: 'translateY(-10px)', 
-                        opacity: '1' 
+                    '30%': {
+                        transform: 'translateY(-10px)',
+                        opacity: '1'
                     },
                 },
                 fadeIn: {

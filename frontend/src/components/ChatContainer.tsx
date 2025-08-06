@@ -107,12 +107,15 @@ How can I help you today? Please describe your technical issue in detail.`,
 
     // Start the API call immediately but don't show results until minimum delay
     const startTime = Date.now();
-    const minimumDelay = 10000; // 10 seconds minimum for human-like timing
+    const minimumDelay = 3000; // 3 seconds minimum for human-like timing
 
     // Show typing indicator after a short delay
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(true);
-    }, 3000); // Show typing after 3 seconds
+    }, 2000); // Show typing after 2 seconds
+
+    let response: any;
+    let error: any;
 
     try {
       // Create conversation if it doesn't exist
@@ -125,41 +128,23 @@ How can I help you today? Please describe your technical issue in detail.`,
       }
 
       // Send chat request
-      const response = await apiService.chat({
+      response = await apiService.chat({
         messages: [userMessage],
         conversation_id: conversationId || undefined,
         user_id: userId,
       });
+    } catch (err) {
+      console.error("Error sending message:", err);
+      error = err;
+    }
 
-      // Calculate how much time has passed
-      const elapsed = Date.now() - startTime;
-      const remainingDelay = Math.max(0, minimumDelay - elapsed);
+    // Calculate how much time has passed and wait for minimum delay
+    const elapsed = Date.now() - startTime;
+    const remainingDelay = Math.max(0, minimumDelay - elapsed);
+    await new Promise((resolve) => setTimeout(resolve, remainingDelay));
 
-      // Wait for the remaining time to ensure minimum delay
-      await new Promise(resolve => setTimeout(resolve, remainingDelay));
-
-      // Add assistant response
-      const assistantMessage: ChatMessage = {
-        role: "assistant",
-        content: response.response,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      // Update conversation ID if it was created during this request
-      if (!conversationId) {
-        setConversationId(response.conversation_id);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-
-      // Calculate how much time has passed for error case too
-      const elapsed = Date.now() - startTime;
-      const remainingDelay = Math.max(0, minimumDelay - elapsed);
-
-      // Wait for the remaining time to ensure minimum delay even for errors
-      await new Promise(resolve => setTimeout(resolve, remainingDelay));
-
+    // Handle response or error after the minimum delay
+    if (error) {
       const errorMessage: ChatMessage = {
         role: "assistant",
         content: `I apologize, but I'm experiencing technical difficulties at the moment. This could be due to:
@@ -176,13 +161,26 @@ How can I help you today? Please describe your technical issue in detail.`,
 Our human support team is standing by to assist you. Thank you for your patience! 🔧`,
       };
       setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      // Clear timeout and hide typing indicator
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+    } else {
+      // Add assistant response
+      const assistantMessage: ChatMessage = {
+        role: "assistant",
+        content: response.response,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      // Update conversation ID if it was created during this request
+      if (!conversationId) {
+        setConversationId(response.conversation_id);
       }
-      setIsTyping(false);
     }
+
+    // Clear timeout and hide typing indicator
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    setIsTyping(false);
   };
 
   return (
