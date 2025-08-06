@@ -1,6 +1,6 @@
 FROM ${OLLAMA_MODEL}
 
-PARAMETER num_ctx 9192
+PARAMETER num_ctx 40960
 PARAMETER repeat_last_n 128
 PARAMETER temperature 0.6
 PARAMETER top_k 30
