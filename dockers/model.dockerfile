@@ -1,4 +1,4 @@
-FROM ollama/ollama:0.9.5
+FROM ollama/ollama:0.11.2
 
 # Install envsubst for environment variable substitution and curl for health checks
 RUN apt-get update && apt-get install -y gettext-base curl && rm -rf /var/lib/apt/lists/*
