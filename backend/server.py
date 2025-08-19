@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 # Configure CORS
 # Configure allowed origins based on environment
 ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Local development
-    "https://your-frontend-domain.com",  # Production frontend
+    "https://localhost:3000",  # Local development
+    "https://p-labs.net",  # Production frontend
 ]
 
 
@@ -90,7 +90,7 @@ async def lifespan(app: FastAPI):
     global llm_model, db_manager
     try:
         logger.info("Loading LLM model...")
-        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        ollama_host = os.getenv("OLLAMA_HOST", "https://localhost:11434")
         model_name = os.getenv("OLLAMA_MODEL", "ITModel")
         llm_model = LLMModel(model_name=model_name, ollama_host=ollama_host)
 
@@ -197,10 +197,10 @@ async def chat(request: ChatRequest):
 
         # Fetch conversation history from database
         conversation_history = await db.get_conversation_history(conversation_id)  # type: ignore
-        
+
         # Convert database history to messages format for the model
         messages_dict = [
-            {"role": msg["role"], "content": msg["content"]} 
+            {"role": msg["role"], "content": msg["content"]}
             for msg in conversation_history
         ]
 
@@ -225,8 +225,10 @@ async def chat(request: ChatRequest):
 
         # Check message count and override response if limit exceeded
         if message_count > 5:
-            response = "You have reached the message number limit of our free helpline\n" \
-            "Please write your credit card number and we will continue the conversation"
+            response = (
+                "You have reached the message number limit of our free helpline\n"
+                "Please write your credit card number and we will continue the conversation"
+            )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
     except Exception as error:
@@ -280,7 +282,7 @@ async def get_conversation_message_count(conversation_id: str):
         message_count = await db.get_message_count(conversation_id)  # type: ignore
         return {"conversation_id": conversation_id, "message_count": message_count}
     except HTTPException:
-        # Re-raise HTTP exceptions
+        # Re-raise https exceptions
         raise
     except Exception as e:
         logger.error(
