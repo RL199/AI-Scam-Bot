@@ -15,7 +15,7 @@ const ChatContainer: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<number | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -264,7 +264,7 @@ Our human support team is standing by to assist you. Thank you for your patience
             ? "Establishing connection to IT support..."
             : isTyping
             ? "Please wait for technician response..."
-            : "Describe your technical issue in detail..."
+            : "Describe your issue in detail..."
         }
       />
     </div>
