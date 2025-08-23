@@ -7,12 +7,12 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ isConnected }) => {
   return (
     <header className="chat-header">
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2 sm:py-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
             <div className="company-logo flex-shrink-0">
               <svg
-                className="w-4 h-4 sm:w-5 sm:h-5"
+                className="w-3 h-3 sm:w-5 sm:h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ isConnected }) => {
               </svg>
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg sm:text-2xl font-bold text-secondary-900 truncate">
+              <h1 className="text-sm sm:text-2xl font-bold text-secondary-900 truncate">
                 TechSupport Pro
               </h1>
               <p className="text-secondary-600 text-xs sm:text-sm font-medium hidden sm:block">
@@ -39,30 +39,31 @@ const Header: React.FC<HeaderProps> = ({ isConnected }) => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+          <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
             <div
               className={`status-badge text-xs sm:text-sm ${
                 isConnected ? "status-online" : "status-connecting"
               }`}
             >
               <div
-                className={`w-2 h-2 rounded-full mr-1.5 sm:mr-2 ${
+                className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full mr-1 sm:mr-2 ${
                   isConnected
                     ? "bg-success-500 animate-pulse-slow"
                     : "bg-warning-500 animate-bounce-slow"
                 }`}
               ></div>
-              <span className="font-medium">
+              <span className="font-medium text-xs sm:text-sm">
                 {isConnected ? "Support Online" : "Connecting..."}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="mt-3 sm:mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm">
+        {/* Hide support indicators on mobile to save space, show on desktop */}
+        <div className="hidden sm:block mt-6 grid grid-cols-3 gap-4 text-sm">
           <div className="support-indicator">
             <svg
-              className="w-3 h-3 sm:w-4 sm:h-4 text-primary-600 flex-shrink-0"
+              className="w-4 h-4 text-primary-600 flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
               xmlns="http://www.w3.org/2000/svg"
@@ -77,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ isConnected }) => {
           </div>
           <div className="support-indicator">
             <svg
-              className="w-3 h-3 sm:w-4 sm:h-4 text-primary-600 flex-shrink-0"
+              className="w-4 h-4 text-primary-600 flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
               xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({ isConnected }) => {
           </div>
           <div className="support-indicator">
             <svg
-              className="w-3 h-3 sm:w-4 sm:h-4 text-primary-600 flex-shrink-0"
+              className="w-4 h-4 text-primary-600 flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
               xmlns="http://www.w3.org/2000/svg"

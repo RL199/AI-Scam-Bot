@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
     body {
@@ -170,14 +170,40 @@
             /* Dynamic viewport height for mobile browsers */
         }
 
+        .chat-header {
+            /* Reduce header height on mobile */
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        .company-logo {
+            width: 1.5rem;
+            height: 1.5rem;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            padding-top: 0.125rem;
+            padding-bottom: 0.125rem;
+            font-size: 0.75rem;
+        }
+
         .chat-messages {
             /* Account for mobile browsers' dynamic viewport */
             padding-bottom: env(safe-area-inset-bottom);
+            /* Reduce padding on mobile to maximize chat space */
+            padding: 0.5rem;
         }
 
         .chat-input-container {
             /* Add safe area padding for devices with notches */
             padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+        }
+
+        .chat-input-wrapper {
+            padding: 0.5rem;
         }
 
         /* Improve touch targets */
@@ -200,6 +226,16 @@
         .scrollbar-thin {
             -ms-overflow-style: none;
             scrollbar-width: none;
+        }
+
+        /* Make messages more compact on mobile */
+        .message-user,
+        .message-assistant {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            font-size: 0.875rem;
         }
     }
 

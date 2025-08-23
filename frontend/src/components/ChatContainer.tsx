@@ -15,7 +15,7 @@ const ChatContainer: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingTimeoutRef = useRef<number | null>(null);
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -231,8 +231,8 @@ Our human support team is standing by to assist you. Thank you for your patience
         </div>
       </div>
 
-      {/* Session Info */}
-      <div className="bg-secondary-50 border-t border-secondary-200 px-3 sm:px-6 py-2">
+      {/* Session Info - More compact on mobile */}
+      <div className="bg-secondary-50 border-t border-secondary-200 px-2 sm:px-6 py-1 sm:py-2">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-xs text-secondary-600">
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
             <span className="truncate">
@@ -243,11 +243,11 @@ Our human support team is standing by to assist you. Thank you for your patience
             <span className="hidden sm:inline">Technician: AI Assistant</span>
             <span className="sm:hidden truncate">AI Tech</span>
           </div>
-          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+          <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
             <span className="hidden sm:inline">Response Time: Excellent</span>
             <span className="sm:hidden">Fast</span>
             <span className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-success-500 rounded-full"></div>
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success-500 rounded-full"></div>
               <span className="hidden sm:inline">Secure Connection</span>
               <span className="sm:hidden">Secure</span>
             </span>
