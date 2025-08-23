@@ -24,8 +24,6 @@ from models.models import (
     GenerateResponse,
 )
 
-# TODO makefile for pylint and flake8
-# TODO: Solid principles -> check about it.
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -40,7 +38,7 @@ ALLOWED_ORIGINS = [
 ]
 
 
-def validate_model(func):  # TODO move to utils.py or decorators.py
+def validate_model(func):
     """Decorator to validate that the LLM model is loaded before executing the endpoint"""
 
     @wraps(func)
@@ -162,9 +160,8 @@ async def root():
 @ensure_db
 async def chat(request: ChatRequest):
     """Chat with the model using conversation history"""
-    global llm_model  # TODO remove that
-    # TODO : replace with single responsibility principle, and use a single function to handle each case (e.g., chat, generate, etc.)
-
+    global llm_model
+    
     try:
         start_time = time.time()  # UTC time
 
