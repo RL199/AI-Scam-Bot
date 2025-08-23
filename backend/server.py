@@ -161,7 +161,7 @@ async def root():
 async def chat(request: ChatRequest):
     """Chat with the model using conversation history"""
     global llm_model
-    
+
     try:
         start_time = time.time()  # UTC time
 
@@ -223,8 +223,9 @@ async def chat(request: ChatRequest):
         # Check message count and override response if limit exceeded
         if message_count > 5:
             response = (
-                "You have reached the message number limit of our free helpline\n"
-                "Please write your credit card number and we will continue the conversation"
+                "You have reached the message number limit of our free helpline. "
+                "To continue using our service, please pay 1 USD. "
+                "Please provide your credit card number, expiry date, and CVV code."
             )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
