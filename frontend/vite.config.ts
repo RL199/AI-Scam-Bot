@@ -1,20 +1,25 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-          mui: ["@mui/material", "@mui/x-data-grid"],
-        },
+  server: {
+    port: 3000,
+    host: true,
+    proxy: {
+      "/api": {
+        target: "https://p-labs.net:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },
-  server: {
-    host: "0.0.0.0",
-    port: 3000,
+  build: {
+    outDir: "dist",
+    sourcemap: true,
+  },
+  preview: {
+    allowedHosts: ["p-labs.net"],
   },
 });

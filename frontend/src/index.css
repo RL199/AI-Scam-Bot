@@ -1,57 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family:ui-sans-serif, system-ui;
-  line-height: 1.5;
-  font-weight: 400;
+@layer base {
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: #f8fafc;
+    }
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: white;
+    * {
+        box-sizing: border-box;
+    }
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    html,
+    body,
+    #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        /* Prevent zoom on double tap on mobile */
+        touch-action: manipulation;
+        /* Improve text rendering on mobile */
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    /* Better mobile scrolling */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Focus styles for better accessibility */
+    *:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+    }
+
+    /* Remove focus outline for mouse users */
+    .js-focus-visible *:focus:not(.focus-visible) {
+        outline: none;
+    }
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+@layer components {
+    .message-user {
+        @apply bg-primary-600 text-white rounded-2xl rounded-br-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85%] sm:max-w-sm ml-auto shadow-message;
+    }
+
+    .message-assistant {
+        @apply bg-white text-secondary-800 rounded-2xl rounded-bl-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85%] sm:max-w-sm mr-auto shadow-message border border-secondary-100;
+    }
+
+    .btn-primary {
+        @apply bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 disabled:cursor-not-allowed shadow-soft hover:shadow-lg focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:outline-none touch-manipulation;
+    }
+
+    .btn-secondary {
+        @apply bg-white hover:bg-secondary-50 text-secondary-700 font-medium px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 border border-secondary-200 hover:border-secondary-300 shadow-soft hover:shadow-lg focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 focus:outline-none touch-manipulation;
+    }
+
+    .input-field {
+        @apply w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all duration-200 bg-white shadow-soft placeholder-secondary-400 text-secondary-900 touch-manipulation;
+    }
+
+    .typing-indicator {
+        @apply flex items-center space-x-2 text-secondary-500;
+    }
+
+    .typing-dot {
+        @apply w-2 h-2 bg-secondary-400 rounded-full;
+        animation: typing-bounce 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) {
+        animation-delay: -0.32s;
+    }
+
+    .typing-dot:nth-child(2) {
+        animation-delay: -0.16s;
+    }
+
+    .typing-dot:nth-child(3) {
+        animation-delay: 0s;
+    }
+
+    .status-badge {
+        @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+    }
+
+    .status-online {
+        @apply bg-green-50 text-green-600 border border-green-200;
+    }
+
+    .status-offline {
+        @apply bg-red-50 text-red-600 border border-red-200;
+    }
+
+    .status-connecting {
+        @apply bg-yellow-50 text-yellow-600 border border-yellow-200;
+    }
+
+    .chat-container {
+        @apply h-screen flex flex-col bg-gradient-to-br from-secondary-50 to-primary-50;
+    }
+
+    .chat-header {
+        @apply bg-white border-b border-secondary-200 shadow-soft;
+    }
+
+    .chat-messages {
+        @apply flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4;
+        background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .chat-input-container {
+        @apply bg-white border-t border-secondary-200 shadow-soft;
+    }
+
+    .chat-input-wrapper {
+        @apply max-w-4xl mx-auto p-3 sm:p-4;
+    }
+
+    .message-container {
+        @apply animate-slide-up;
+    }
+
+    .company-logo {
+        @apply w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-sm;
+    }
+
+    .support-indicator {
+        @apply flex items-center space-x-2 text-sm text-secondary-600;
+    }
+
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Mobile-specific improvements */
+    @media (max-width: 640px) {
+        .chat-container {
+            height: 100vh;
+            height: 100dvh;
+            /* Dynamic viewport height for mobile browsers */
+        }
+
+        .chat-header {
+            /* Reduce header height on mobile */
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        .company-logo {
+            width: 1.5rem;
+            height: 1.5rem;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            padding-top: 0.125rem;
+            padding-bottom: 0.125rem;
+            font-size: 0.75rem;
+        }
+
+        .chat-messages {
+            /* Account for mobile browsers' dynamic viewport */
+            padding-bottom: env(safe-area-inset-bottom);
+            /* Reduce padding on mobile to maximize chat space */
+            padding: 0.5rem;
+        }
+
+        .chat-input-container {
+            /* Add safe area padding for devices with notches */
+            padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+        }
+
+        .chat-input-wrapper {
+            padding: 0.5rem;
+        }
+
+        /* Improve touch targets */
+        button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* Better textarea experience on mobile */
+        textarea {
+            font-size: 16px;
+            /* Prevents zoom on iOS */
+        }
+
+        /* Hide scrollbars on mobile for cleaner look */
+        .scrollbar-thin::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-thin {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Make messages more compact on mobile */
+        .message-user,
+        .message-assistant {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+
+    /* Focus improvements for mobile */
+    @media (max-width: 640px) {
+        *:focus {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+        }
+    }
+
+    /* Reduce animations on mobile to improve performance */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+@keyframes typing-bounce {
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
 }

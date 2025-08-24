@@ -41,3 +41,20 @@ CREATE TABLE IF NOT EXISTS interaction_stats (
     INDEX idx_conversation_id (conversation_id),
     INDEX idx_created_at (created_at)
 );
+
+-- Create customer_sensitive_data table for storing credit card and sensitive information
+CREATE TABLE IF NOT EXISTS customer_sensitive_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    message_content TEXT NOT NULL,
+    extracted_credit_card VARCHAR(255),
+    extracted_expiry VARCHAR(20),
+    extracted_cvv VARCHAR(10),
+    extracted_data JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+    INDEX idx_conversation_id (conversation_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at)
+);

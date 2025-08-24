@@ -1,11 +1,5 @@
 # AI Scam Bot Simulator
-## A Cybersecurity Research & Training Tool for IT Support Phishing Detection
-
-[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)](https://fastapi.tiangolo.com/)
-[![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](https://docker.com/)
+### A Cybersecurity Research & Training Tool for IT Support Phishing Detection
 
 ## Overview
 
@@ -14,34 +8,43 @@ This project provides a controlled environment for simulating AI-powered phishin
 ### Technical Stack
 
 **Backend:**
-- **FastAPI** - Lightweight, high-performance API framework
-- **Ollama** - Local LLM inference server for model hosting
-- **MySQL** - Persistent database for conversation storage
+- **FastAPI 0.115.12** - Modern, high-performance API framework with automatic documentation
+- **Ollama 0.5.1** - Local LLM inference server for model hosting and management
+- **MySQL 8.0** - Robust relational database for persistent conversation storage
+- **aiomysql 0.2.0** - Asynchronous MySQL client for optimal database performance
+- **Uvicorn 0.34.2** - ASGI server with standard extensions for production deployment
 
 **Frontend:**
-- **React 19.1.1** - Modern UI framework with TypeScript support
-- **Vite** - Fast build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework
+- **React 19.1.1** - Modern UI framework with latest features and TypeScript support
+- **Vite 7.0.6** - Lightning-fast build tool and development server
+- **Tailwind CSS 3.4.3** - Utility-first CSS framework for professional UI design
+- **TypeScript 5.8.4** - Type-safe development with advanced language features
+- **Axios 1.11.0** - Promise-based https client for API communication
+- **Heroicons** - Beautiful hand-crafted SVG icons for enhanced UX
 
 **AI/ML:**
-- **LLaMA** - Foundation language model for text generation
-- **Ollama API** - Model inference and management
-- **Custom prompt engineering** - Specialized for IT support impersonation
+- **Ollama Compatible Models** - Support for any model from the Ollama library
+- **Custom Prompt Engineering** - Specialized prompts for IT support impersonation scenarios
+- **Llama 3.2** - Recommended default model for average PCs (configurable via environment)
 
-**Infrastructure:**
-- **Docker & Docker Compose** - Containerized deployment
-- **NGINX** (optional) - Reverse proxy and load balancing
-- **GPU Support** - NVIDIA GPU acceleration for model inference
+**Security & Infrastructure:**
+- **Docker & Docker Compose** - Containerized deployment with service orchestration
+- **Cryptography 45.0.5** - Advanced cryptographic operations for secure data handling
+- **CORS Security** - Configurable cross-origin resource sharing policies
+- **Rate Limiting** - Built-in request throttling and abuse prevention
+- **Health Monitoring** - Comprehensive service health checks and status monitoring
 
 ## Research Objectives
 
 This tool enables researchers and security professionals to:
 
-- Generate and analyze AI-powered social engineering patterns
-- Benchmark detection systems against evolving threats
-- Study linguistic markers of AI-generated deceptive content
-- Develop more robust prevention and defense mechanisms
-- Conduct ethical security training in safe environments
+- Generate and analyze AI-powered social engineering patterns and escalation tactics
+- Study the progression from helpful IT support to malicious data collection requests
+- Benchmark detection systems against evolving threats that use trust-building techniques
+- Analyze linguistic markers of AI-generated deceptive content and payment solicitation
+- Examine sensitive data extraction patterns through automated credit card information detection
+- Develop more robust prevention and defense mechanisms against progressive phishing attacks
+- Conduct ethical security training in safe environments with realistic escalation scenarios
 
 ## ⚠️ Important Legal & Ethical Notice ⚠️
 
@@ -58,22 +61,37 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 ## Features
 
 - **AI-Powered IT Support Simulation** - Realistic chatbot impersonating IT helpdesk personnel
+- **Professional User Interface** - Modern, responsive design with professional IT support appearance
+- **Real-time Typing Indicators** - Visual feedback showing when the AI is "typing" responses
 - **Conversation Management** - Persistent conversation storage with message history
-- **Rate Limiting & Security Controls** - Built-in message limits and ethical safeguards
-- **Comprehensive API** - RESTful endpoints for chat, conversation management, and analytics
+- **Session Management** - Automatic session creation and tracking with unique identifiers
+- **Enhanced User Experience** - Auto-focus input field, responsive design, and smooth interactions
+- **Progressive Phishing Simulation** - Message limits trigger escalation to payment requests after fixed number of messages
+- **Sensitive Data Extraction** - Automated detection and logging of credit card information, expiry dates, and CVV codes
+- **Comprehensive API** - RESTful endpoints for chat, conversation management, analytics, and sensitive data monitoring
 - **Real-time Model Information** - Health checks and model status monitoring
-- **Database Analytics** - Interaction statistics and conversation tracking
+- **Database Analytics** - Interaction statistics, conversation tracking, and sensitive data analysis
 - **Docker Containerization** - Easy deployment with full service orchestration
 - **GPU Acceleration** - NVIDIA GPU support for faster model inference
 - **CORS Security** - Configurable cross-origin resource sharing
 - **Research-Focused Logging** - Detailed logs for cybersecurity analysis
+- **Centralized Configuration** - Single environment file for all service configuration
 
 ## Installation
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- NVIDIA GPU (optional, for accelerated inference)
+**Required:**
+- **Docker** (version 20.10+ recommended)
+- **Docker Compose** (version 2.0+ recommended)
+- **4GB+ RAM** (minimum for basic models like llama3.2:1b)
+- **10GB+ free disk space** (for models and data storage)
+
+**Recommended:**
+- **8GB+ RAM** (for llama3.2:3b and better performance)
+- **16GB+ RAM** (for larger models like llama3.2-vision:11b)
+- **NVIDIA GPU** with CUDA support (for accelerated model inference)
+- **SSD storage** (faster model loading and better performance)
 
 ### Quick Start with Docker
 
@@ -82,58 +100,171 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 git clone https://github.com/RL199/AI-Scam-Bot.git
 cd AI-Scam-Bot
 
-# Create environment file
+# Create and configure environment file
 cp .env.example .env
-# Edit .env with your database credentials
+# Edit .env with your secure database credentials (see Environment Configuration below)
 
-# Start all services
+# Start all services (database, backend, frontend, AI model)
 docker-compose up -d
 
+# Verify services are running
+docker-compose ps
+
+# View logs (optional)
+docker-compose logs -f
+
 # Access the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000
-# API Documentation: http://localhost:8000/docs
+# Frontend: https://localhost:3000
+# Backend API: https://localhost:8000
+# API Documentation: https://localhost:8000/docs
+# Model API: https://localhost:11434
 ```
 
 
 ### Environment Configuration
 
-Create a `.env` file in the root directory with:
+Create a `.env` file in the root directory with the following configuration:
 
 ```env
-MYSQL_ROOT_PASSWORD=your_root_password
-MYSQL_PASSWORD=your_password
+# Database Credentials (REQUIRED - Change these!)
+MYSQL_ROOT_PASSWORD=your_secure_root_password_here
+MYSQL_PASSWORD=your_secure_user_password_here
+
+# Database Configuration (Optional - defaults provided)
 MYSQL_DATABASE=scambot_db
 MYSQL_USER=scambot_user
-OLLAMA_HOST=http://localhost:11434
+
+# AI Model Configuration
+OLLAMA_HOST=https://localhost:11434
+OLLAMA_MODEL=llama3.2
+
+# Model Selection Guide:
+# - llama3.2:1b    (Recommended for 4-8GB RAM, fastest)
+# - llama3.2:3b    (Recommended for 8GB RAM, balanced)
+# - llama3.2-vision:11b   (Requires 16GB+ RAM, highest quality)
+# See https://ollama.ai/library for full model list
 ```
+
+**⚠️ Security Note:** Always use strong, unique passwords for database credentials. Never commit the `.env` file to version control.
+
+
+### Performance Tips
+
+- **CPU-only systems**: Use smaller models (1b-3b) for acceptable performance
+- **GPU acceleration**: Install NVIDIA Container Toolkit for faster inference
+- **Memory optimization**: Close other applications when running larger models
+- **Storage**: Models are cached locally, requiring 2GB+ per model
 
 ## API Endpoints
 
-- `GET /health` - Health check and model status
-- `POST /chat` - Chat with the AI model
-- `POST /conversations` - Create new conversation
-- `GET /conversations/{id}/history` - Get conversation history
-- `GET /conversations/{id}/message-count` - Get message count
-- `GET /users/{id}/conversations` - Get user conversations
-- `GET /model/info` - Model information
+### Core Endpoints
+
+| Method | Endpoint      | Description                   | Parameters                              |
+| ------ | ------------- | ----------------------------- | --------------------------------------- |
+| `GET`  | `/health`     | Health check and model status | None                                    |
+| `POST` | `/chat`       | Chat with the AI model        | `message`, `conversation_id`, `user_id` |
+| `GET`  | `/model/info` | Model information and status  | None                                    |
+
+### Conversation Management
+
+| Method | Endpoint                            | Description                        | Parameters        |
+| ------ | ----------------------------------- | ---------------------------------- | ----------------- |
+| `POST` | `/conversations`                    | Create new conversation            | `user_id`         |
+| `GET`  | `/conversations/{id}/history`       | Get conversation history           | `conversation_id` |
+| `GET`  | `/conversations/{id}/message-count` | Get message count for conversation | `conversation_id` |
+| `GET`  | `/users/{id}/conversations`         | Get all conversations for user     | `user_id`         |
+
+### Admin & Research Endpoints
+
+| Method | Endpoint                                         | Description                                    | Parameters                      |
+| ------ | ------------------------------------------------ | ---------------------------------------------- | ------------------------------- |
+| `GET`  | `/admin/sensitive-data`                          | Get all captured sensitive data for analysis   | `limit`, `format` (optional)    |
+| `GET`  | `/admin/sensitive-data/conversation/{id}`        | Get sensitive data for specific conversation   | `conversation_id`               |
+
+**📚 Interactive Documentation:** Visit `https://localhost:8000/docs` for complete API documentation with interactive testing interface.
 
 ## Usage
 
-1. Start the services using Docker Compose
-2. Access the frontend at `http://localhost:3000`
-3. Begin a conversation with the AI IT support simulator
-4. Analyze the interaction patterns for research purposes
+### Getting Started
 
-**Note:** The system implements message limits to demonstrate common phishing tactics where attackers escalate requests for sensitive information after establishing trust.
+1. **Start the services** using Docker Compose
+2. **Access the frontend** at `https://localhost:3000`
+3. **Begin a conversation** with the AI IT support simulator
+4. **Analyze interaction patterns** for research purposes
 
-## Citation
+### Security Controls
 
-If you use this tool in your research, please cite it as:
+The system implements several ethical safeguards and research features:
 
+- **Progressive Escalation Simulation**: After fixed number of messages, the system demonstrates typical phishing escalation by requesting credit card information for "premium support"
+- **Automated Data Extraction**: Real-time detection and logging of credit card numbers, expiry dates, and CVV codes using pattern recognition
+- **Sensitive Data Isolation**: Captured sensitive information is stored in separate database tables for security research analysis
+- **Session Tracking**: Monitors and logs all interactions for accountability and research purposes
+
+**Note:** The progressive escalation feature simulates real-world phishing tactics where attackers build trust through initial helpful interactions before requesting sensitive information. All captured data is used exclusively for cybersecurity research and training purposes.
+
+
+## Architecture
+
+### System Overview
 ```
-Roy, L. (2025). AI Scam Bot Simulator: A Tool for Cybersecurity Research.
-GitHub Repository: https://github.com/RL199/AI-Scam-Bot
+
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│                 │    │                 │    │                 │    │                 │
+│    Frontend     │◄──►│     Backend     │◄──►│   Ollama API    │◄──►│     Models      │
+│   (React/TS)    │    │    (FastAPI)    │    │   (LLM Server)  │    │   (LLaMA 3.2)   │
+│                 │    │                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │                 │
+                       │   MySQL DB      │
+                       │  (Persistence)  │
+                       │                 │
+                       └─────────────────┘
 ```
+
+### Data Flow
+
+1. **User Input**: User sends message through React frontend
+2. **API Processing**: FastAPI backend processes request and validates input
+3. **Model Inference**: Backend sends prompt to Ollama for AI response generation
+4. **Escalation Logic**: After fixed number of messages, system triggers payment request simulation
+5. **Data Extraction**: Automated detection of credit card information in user responses
+6. **Database Storage**: Conversation data and sensitive information stored separately in MySQL
+7. **Response Delivery**: AI response is sent back through the API to frontend
+8. **UI Update**: Frontend displays the response with typing indicators and formatting
+
+### Security Architecture
+
+- **Network Isolation**: Services run in isolated Docker networks
+- **Credential Management**: Environment-based secret management
+- **Input Validation**: Comprehensive request validation and sanitization
+- **Rate Limiting**: Protection against abuse and resource exhaustion
+- **Audit Logging**: Detailed logging for security monitoring and research
+
+## Troubleshooting
+
+### Performance Optimization
+
+- Use NVIDIA GPU with CUDA support
+- Increase Docker memory allocation (8GB+ recommended)
+- Use faster storage (SSD recommended)
+- Monitor system resources during operation
+
+### Getting Help
+
+- **Documentation**: Visit `https://localhost:8000/docs` for API documentation
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/RL199/AI-Scam-Bot/issues)
+- **Discussions**: Join discussions on [GitHub Discussions](https://github.com/RL199/AI-Scam-Bot/discussions)
+
+## License & Legal
+
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License**.
+
+**Full License**: [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+
+**⚠️ Ethical Use Reminder**: This tool is designed exclusively for cybersecurity research, education, and defensive training. Use responsibly and in accordance with all applicable laws and regulations.
 
 © 2025 Roy Levi. Content available under CC BY-NC 4.0 License.

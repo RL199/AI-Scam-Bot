@@ -17,6 +17,12 @@ services:
     networks:
       service_net:
         ipv4_address: 172.18.0.2
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
 
   backend:
     build:
@@ -28,6 +34,7 @@ services:
       - DATABASE_PASSWORD=${MYSQL_PASSWORD}
       - DATABASE_NAME=${MYSQL_DATABASE:-scambot_db}
       - OLLAMA_HOST=http://model:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2-vision:11b}
     ports:
       - "8000:8000"
     restart: on-failure
@@ -35,13 +42,17 @@ services:
       service_net:
         ipv4_address: 172.18.0.4
     depends_on:
-      - database
-      - model
+      database:
+        condition: service_healthy
+      model:
+        condition: service_healthy
 
   frontend:
     build:
       context: .
       dockerfile: dockers/frontend.dockerfile
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
     ports:
       - "3000:3000"
     restart: on-failure
@@ -49,7 +60,8 @@ services:
       service_net:
         ipv4_address: 172.18.0.5
     depends_on:
-      - backend
+      backend:
+        condition: service_started
 
   model:
     build:
@@ -64,6 +76,8 @@ services:
       - OLLAMA_HOST=0.0.0.0:11434
       # Set model download directory
       - OLLAMA_MODELS=/root/.ollama/models
+      # Pass the model name from environment
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2-vision:11b}
       # Enable GPU support
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
@@ -71,6 +85,12 @@ services:
     networks:
       service_net:
         ipv4_address: 172.18.0.6
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 60s
     deploy:
       resources:
         reservations:

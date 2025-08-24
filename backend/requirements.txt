@@ -1,7 +1,7 @@
 # black == 25.1.0              # Code formatter that automatically formats Python code to PEP 8 standards
 fastapi == 0.115.12          # Modern web framework for building APIs with automatic documentation
 # flake8 == 7.2.0              # Code linter that checks for style guide enforcement and programming errors
-# httpx == 0.28.1              # HTTP client library with async support, modern alternative to requests
+# httpx == 0.28.1              # http client library with async support, modern alternative to requests
 # pylint == 3.3.7              # Static code analyzer that checks for errors and code quality issues
 # pytest == 8.3.5              # Testing framework for writing and running unit tests
 uvicorn[standard] == 0.34.2  # ASGI server for running FastAPI applications with extra features
