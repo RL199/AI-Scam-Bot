@@ -38,11 +38,13 @@ This project provides a controlled environment for simulating AI-powered phishin
 
 This tool enables researchers and security professionals to:
 
-- Generate and analyze AI-powered social engineering patterns
-- Benchmark detection systems against evolving threats
-- Study linguistic markers of AI-generated deceptive content
-- Develop more robust prevention and defense mechanisms
-- Conduct ethical security training in safe environments
+- Generate and analyze AI-powered social engineering patterns and escalation tactics
+- Study the progression from helpful IT support to malicious data collection requests
+- Benchmark detection systems against evolving threats that use trust-building techniques
+- Analyze linguistic markers of AI-generated deceptive content and payment solicitation
+- Examine sensitive data extraction patterns through automated credit card information detection
+- Develop more robust prevention and defense mechanisms against progressive phishing attacks
+- Conduct ethical security training in safe environments with realistic escalation scenarios
 
 ## ⚠️ Important Legal & Ethical Notice ⚠️
 
@@ -64,10 +66,11 @@ Unauthorized deployment or misuse may violate multiple laws including computer f
 - **Conversation Management** - Persistent conversation storage with message history
 - **Session Management** - Automatic session creation and tracking with unique identifiers
 - **Enhanced User Experience** - Auto-focus input field, responsive design, and smooth interactions
-- **Rate Limiting & Security Controls** - Built-in message limits and ethical safeguards
-- **Comprehensive API** - RESTful endpoints for chat, conversation management, and analytics
+- **Progressive Phishing Simulation** - Message limits trigger escalation to payment requests after fixed number of messages
+- **Sensitive Data Extraction** - Automated detection and logging of credit card information, expiry dates, and CVV codes
+- **Comprehensive API** - RESTful endpoints for chat, conversation management, analytics, and sensitive data monitoring
 - **Real-time Model Information** - Health checks and model status monitoring
-- **Database Analytics** - Interaction statistics and conversation tracking
+- **Database Analytics** - Interaction statistics, conversation tracking, and sensitive data analysis
 - **Docker Containerization** - Easy deployment with full service orchestration
 - **GPU Acceleration** - NVIDIA GPU support for faster model inference
 - **CORS Security** - Configurable cross-origin resource sharing
@@ -171,6 +174,13 @@ OLLAMA_MODEL=llama3.2
 | `GET`  | `/conversations/{id}/message-count` | Get message count for conversation | `conversation_id` |
 | `GET`  | `/users/{id}/conversations`         | Get all conversations for user     | `user_id`         |
 
+### Admin & Research Endpoints
+
+| Method | Endpoint                                         | Description                                    | Parameters                      |
+| ------ | ------------------------------------------------ | ---------------------------------------------- | ------------------------------- |
+| `GET`  | `/admin/sensitive-data`                          | Get all captured sensitive data for analysis   | `limit`, `format` (optional)    |
+| `GET`  | `/admin/sensitive-data/conversation/{id}`        | Get sensitive data for specific conversation   | `conversation_id`               |
+
 **📚 Interactive Documentation:** Visit `https://localhost:8000/docs` for complete API documentation with interactive testing interface.
 
 ## Usage
@@ -184,14 +194,14 @@ OLLAMA_MODEL=llama3.2
 
 ### Security Controls
 
-The system implements several ethical safeguards:
+The system implements several ethical safeguards and research features:
 
-- **Message Limits**: Demonstrates escalation tactics used by attackers
-- **Content Filtering**: Prevents generation of harmful or illegal content
-- **Session Tracking**: Monitors and logs all interactions for accountability
-- **Disclaimer Injection**: Adds research disclaimers to all generated content
+- **Progressive Escalation Simulation**: After fixed number of messages, the system demonstrates typical phishing escalation by requesting credit card information for "premium support"
+- **Automated Data Extraction**: Real-time detection and logging of credit card numbers, expiry dates, and CVV codes using pattern recognition
+- **Sensitive Data Isolation**: Captured sensitive information is stored in separate database tables for security research analysis
+- **Session Tracking**: Monitors and logs all interactions for accountability and research purposes
 
-**Note:** The system implements message limits to demonstrate common phishing tactics where attackers escalate requests for sensitive information after establishing trust.
+**Note:** The progressive escalation feature simulates real-world phishing tactics where attackers build trust through initial helpful interactions before requesting sensitive information. All captured data is used exclusively for cybersecurity research and training purposes.
 
 
 ## Architecture
@@ -220,9 +230,11 @@ The system implements several ethical safeguards:
 1. **User Input**: User sends message through React frontend
 2. **API Processing**: FastAPI backend processes request and validates input
 3. **Model Inference**: Backend sends prompt to Ollama for AI response generation
-4. **Database Storage**: Conversation data is stored in MySQL for persistence
-5. **Response Delivery**: AI response is sent back through the API to frontend
-6. **UI Update**: Frontend displays the response with typing indicators and formatting
+4. **Escalation Logic**: After fixed number of messages, system triggers payment request simulation
+5. **Data Extraction**: Automated detection of credit card information in user responses
+6. **Database Storage**: Conversation data and sensitive information stored separately in MySQL
+7. **Response Delivery**: AI response is sent back through the API to frontend
+8. **UI Update**: Frontend displays the response with typing indicators and formatting
 
 ### Security Architecture
 
