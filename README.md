@@ -141,7 +141,6 @@ OLLAMA_MODEL=llama3.2
 # Model Selection Guide:
 # - llama3.2:1b    (Recommended for 4-8GB RAM, fastest)
 # - llama3.2:3b    (Recommended for 8GB RAM, balanced)
-# - llama3.2-vision:11b   (Requires 16GB+ RAM, highest quality)
 # See https://ollama.ai/library for full model list
 ```
 
