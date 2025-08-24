@@ -31,7 +31,6 @@ This project provides a controlled environment for simulating AI-powered phishin
 - **Docker & Docker Compose** - Containerized deployment with service orchestration
 - **Cryptography 45.0.5** - Advanced cryptographic operations for secure data handling
 - **CORS Security** - Configurable cross-origin resource sharing policies
-- **Rate Limiting** - Built-in request throttling and abuse prevention
 - **Health Monitoring** - Comprehensive service health checks and status monitoring
 
 ## Research Objectives
