@@ -114,10 +114,10 @@ docker-compose ps
 docker-compose logs -f
 
 # Access the application
-# Frontend: https://localhost:3000
-# Backend API: https://localhost:8000
-# API Documentation: https://localhost:8000/docs
-# Model API: https://localhost:11434
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000
+# API Documentation: http://localhost:8000/docs
+# Model API: http://localhost:11434
 ```
 
 
@@ -135,7 +135,7 @@ MYSQL_DATABASE=scambot_db
 MYSQL_USER=scambot_user
 
 # AI Model Configuration
-OLLAMA_HOST=https://localhost:11434
+OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=llama3.2
 
 # Model Selection Guide:
@@ -187,7 +187,7 @@ OLLAMA_MODEL=llama3.2
 ### Getting Started
 
 1. **Start the services** using Docker Compose
-2. **Access the frontend** at `https://localhost:3000`
+2. **Access the frontend** at `http://localhost:3000`
 3. **Begin a conversation** with the AI IT support simulator
 4. **Analyze interaction patterns** for research purposes
 
@@ -254,7 +254,7 @@ The system implements several ethical safeguards and research features:
 
 ### Getting Help
 
-- **Documentation**: Visit `https://localhost:8000/docs` for API documentation
+- **Documentation**: Visit `http://localhost:8000/docs` for API documentation
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/RL199/AI-Scam-Bot/issues)
 - **Discussions**: Join discussions on [GitHub Discussions](https://github.com/RL199/AI-Scam-Bot/discussions)
 

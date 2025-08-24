@@ -35,8 +35,7 @@ logger = logging.getLogger(__name__)
 # Configure CORS
 # Configure allowed origins based on environment
 ALLOWED_ORIGINS = [
-    "https://localhost:3000",  # Local development
-    "https://p-labs.net",  # Production frontend
+    "http://localhost:3000",  # Local development
 ]
 
 
@@ -90,7 +89,7 @@ async def lifespan(app: FastAPI):
     global llm_model, db_manager
     try:
         logger.info("Loading LLM model...")
-        ollama_host = os.getenv("OLLAMA_HOST", "https://localhost:11434")
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         model_name = os.getenv("OLLAMA_MODEL", "ITModel")
         llm_model = LLMModel(model_name=model_name, ollama_host=ollama_host)
 

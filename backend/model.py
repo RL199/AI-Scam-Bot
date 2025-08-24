@@ -16,7 +16,7 @@ class LLMModel:
         self,
         model_name: str = "ITModel",
         logger: logging.Logger = logging.getLogger(__name__),
-        ollama_host: str = "https://localhost:11434",
+        ollama_host: str = "http://localhost:11434",
     ) -> None:
         self.logger = logger
         self.model_name = model_name
