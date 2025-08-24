@@ -10,6 +10,7 @@ import TypingIndicator from "./TypingIndicator";
 const ChatContainer: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [userId] = useState<string>(() => uuidv4());
   const [isConnected, setIsConnected] = useState(false);
@@ -91,6 +92,9 @@ How can I help you today? Please describe your technical issue in detail.`,
       return;
     }
 
+    // Disable input immediately when message is sent
+    setIsProcessing(true);
+
     const userMessage: ChatMessage = {
       role: "user",
       content: messageContent,
@@ -107,7 +111,7 @@ How can I help you today? Please describe your technical issue in detail.`,
 
     // Start the API call immediately but don't show results until minimum delay
     const startTime = Date.now();
-    const minimumDelay = 3000; // 3 seconds minimum for human-like timing
+    const minimumDelay = 10000; // 10 seconds minimum for human-like timing
 
     // Show typing indicator after a short delay
     typingTimeoutRef.current = setTimeout(() => {
@@ -181,6 +185,7 @@ Our human support team is standing by to assist you. Thank you for your patience
       clearTimeout(typingTimeoutRef.current);
     }
     setIsTyping(false);
+    setIsProcessing(false);
   };
 
   return (
@@ -257,11 +262,11 @@ Our human support team is standing by to assist you. Thank you for your patience
       {/* Chat Input */}
       <ChatInput
         onSendMessage={handleSendMessage}
-        disabled={!isConnected || isTyping}
+        disabled={!isConnected || isTyping || isProcessing}
         placeholder={
           !isConnected
             ? "Establishing connection to IT support..."
-            : isTyping
+            : isTyping || isProcessing
             ? "Please wait for technician response..."
             : "Describe your issue in detail..."
         }
