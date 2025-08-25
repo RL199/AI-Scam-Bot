@@ -106,6 +106,12 @@ cp .env.example .env
 # Start all services (database, backend, frontend, AI model)
 docker-compose up -d
 
+# ⏳ First-time setup note: When setting up the LLM for the first time,
+# the model container will download the AI model, which may take several minutes
+# depending on your internet connection and the model size.
+# Monitor the model container logs to track download progress:
+docker-compose logs -f model
+
 # Verify services are running
 docker-compose ps
 
@@ -174,10 +180,10 @@ OLLAMA_MODEL=llama3.2
 
 ### Admin & Research Endpoints
 
-| Method | Endpoint                                         | Description                                    | Parameters                      |
-| ------ | ------------------------------------------------ | ---------------------------------------------- | ------------------------------- |
-| `GET`  | `/admin/sensitive-data`                          | Get all captured sensitive data for analysis   | `limit`, `format` (optional)    |
-| `GET`  | `/admin/sensitive-data/conversation/{id}`        | Get sensitive data for specific conversation   | `conversation_id`               |
+| Method | Endpoint                                  | Description                                  | Parameters                   |
+| ------ | ----------------------------------------- | -------------------------------------------- | ---------------------------- |
+| `GET`  | `/admin/sensitive-data`                   | Get all captured sensitive data for analysis | `limit`, `format` (optional) |
+| `GET`  | `/admin/sensitive-data/conversation/{id}` | Get sensitive data for specific conversation | `conversation_id`            |
 
 **📚 Interactive Documentation:** Visit `https://localhost:8000/docs` for complete API documentation with interactive testing interface.
 
