@@ -244,8 +244,7 @@ Our human support team is standing by to assist you. Thank you for your patience
               ID: {conversationId?.slice(-8) || "Send message first"}
             </span>
             <span className="hidden sm:inline">Messages: {messageCount}</span>
-            <span className="sm:hidden">Msgs: {messageCount}</span>
-            <span className="sm:hidden truncate">AI Tech</span>
+            <span className="sm:hidden">Msgs: {messageCount}</span>{" "}
           </div>
           <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
             <span className="hidden sm:inline">Response Time: Excellent</span>
